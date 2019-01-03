@@ -14,23 +14,77 @@ namespace Installer
 {
     class Utilities : INotifyPropertyChanged
     {
-
-
-
-        public static string BackColor { get; set; }
-        public static string ConnectionVal { get; set; }
-        public static string CurrentRelease { get; set; }
-        public static string SerialNum { get; set; }
-        
-
-        public ConsoleContent dc { get; set; }
         public Utilities()
         {
             dc = new ConsoleContent();
+            ConnectionColor = Constants.Fastboot_Color;
+            BackColor = Constants.Fail_Color;
+            
         }
-
+       
+        Constants con = new Constants();
+        public static bool Pause { get; set; }
+        public string Output { get; set; }
+        public static string BackColor { get; set; }
+        public static string ConnectionColor { get; set; }
+        private static string conVal;
+        public static string ConnectionVal { 
+            get
+        {
+            return conVal;
+        }
+            set
+            {
+                conVal = value;
+                if (value == "Fastboot")
+                    ConnectionColor = Constants.Fastboot_Color;
+                else if (value == "Connected")
+                    ConnectionColor = Constants.Pass_Color;
+                else
+                    ConnectionColor = Constants.Fail_Color;
+               
+            }
+        }
+        public static string CurrentRelease { get; set; }
+        public static string SerialNum { get; set; }
+        public static string Release { get; set; }
+        public static string Engine { get; set; }
 
         
+        private static int level;
+        public static int BatteryLevel {
+            get
+            {
+                return level;
+            }
+            set
+            {
+                if (value > 4000000)
+                {
+                    BackColor = Constants.Pass_Color;
+                    level = value;
+                }
+                else if (value < 4000000 && value > 3800000)
+                {
+                    BackColor = Constants.Warning_Color;
+                    level = value;
+                }
+                else
+                {
+                    level = value;
+                    BackColor = Constants.Fail_Color;
+                }
+            }
+        }
+        
+       
+
+
+        public ConsoleContent dc { get; set; }
+       
+
+
+         
 
         //Check if device connected
         public string Find_File(string hint)
@@ -44,6 +98,46 @@ namespace Installer
         }
 
 
+        public void Get_Release_and_Engine_Version()
+        {
+            Constants con = new Constants();
+            string cmd = string.Format("adb shell \"sh {0}/{1}\"",con.Get_Etc_Iar_Path(), con.Get_Versions());
+                        
+            proc(cmd);
+            var o = Output;
+            Regex rx = new Regex(@"Build.*");
+            Match match = rx.Match(Output);
+            if (!match.Success)
+                throw new NullReferenceException();
+            Release = match.Value;
+           
+            Regex rx1 = new Regex(@"IAR Engine Version.*");
+            Match match1 = rx1.Match(o);
+            if (!match1.Success)
+                throw new NullReferenceException();
+            Engine = match1.Value;
+            
+            Output = "";
+           
+            
+        }
+
+        public void Check_Battary_Level()
+        {
+            Constants con = new Constants();
+            string cmd = string.Format("adb shell \"cat {0}\"",con.Get_Voltage());
+            proc(cmd);
+            Regex rx = new Regex(@"\d+");
+            Match match = rx.Match(Output);
+            Output = "";
+            if (!match.Success)
+                throw new NullReferenceException();
+            int bLevel;
+            int.TryParse(match.Value.Trim(), out bLevel);
+            BatteryLevel = bLevel;
+        }
+
+
         public void Check_devices()
         {
             Constants con = new Constants();
@@ -52,13 +146,26 @@ namespace Installer
             Match match = rx.Match(Output);
             Output = "";
             if (!match.Success)
-                throw new NullReferenceException();
-            SerialNum = match.Value.Split('\n')[1];
-            
-           
+            {
+                proc("fastboot devices");
+                Regex rx1 = new Regex(@"fastboot.*");
+                Match match1 = rx.Match(Output);
+                if (!match1.Success)
+                    throw new NullReferenceException();
+                else
+                {
+                    ConnectionVal = "Fastboot";
+                    SerialNum = Output.Split('\t')[0]; 
+                    Output = "";
+                    return;
+                }
+            }
+            ConnectionVal = con.Connected();
+            SerialNum = match.Value.Split('\n')[1];        
+            Output = "";                    
         }
 
-        public string Output { get; set; }
+        
         public void proc(string cmd)
         {
             //string output = "";

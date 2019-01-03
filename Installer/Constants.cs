@@ -12,16 +12,21 @@ namespace Installer
     class Constants
 
     {
-        public string Pass_Color { get; set; }
-        public string Fail_Color { get; set; }
+        public static string Pass_Color { get; set; }
+        public static string Fail_Color { get; set; }
+        public static string Fastboot_Color { get; set; }
+        public static string Warning_Color { get; set; }
        
         public Constants()
         {
-            Pass_Color = "#00b33c";
-            Fail_Color = "#FFDC9D96";
+            Pass_Color = "#99e699";//"#00b33c";
+            Fail_Color =  "#ff6666";  //"#FFDC9D96";
+            Fastboot_Color = "#94b8b8";
+            Warning_Color = "#ffc266";
+            
         }
 
-
+        const string jsonFile = "Config.JSON";
         const string connected = "Connected";
         const string disconnected = "Disconnected";
         const string adb = "adb";
@@ -32,14 +37,44 @@ namespace Installer
         const string flash = "flash";
         const string fastboot = "fastboot";
         const string hexagonFile = "testsig";
+        const string bootloader = "bootloader";
 
+        const string versionsScript = "iarversions.sh";
+        const string voltage = "/sys/class/power_supply/battery/voltage_now";
         const string hexagonPath = "/system/lib/rfsa/adsp";
         const string calPath = "/sdcard/iar/";
-        const string debugEtcPath = "/etc/iar/";
+        const string etcPath = "/etc/iar/";
         string[] calFiles = {"imu.cal", "display.cal", "camera.cal"};
         const string configFile = "config.ini";
         const string debugConfigFile = "debugConfig.ini";
         const string devices = "adb devices";
+       
+        string fastBootDevices = "fastboot devices";
+
+        
+      
+
+        public string Get_Json_file_name()
+        {
+            return jsonFile;
+        }
+
+       
+
+        public string Get_Versions()
+        {
+            return versionsScript;
+        }
+
+        public string Get_Voltage()
+        {
+            return voltage;
+        }
+
+        public string Get_Bootloader()
+        {
+            return bootloader;
+        }
 
         public string Connected()
         {
@@ -64,7 +99,7 @@ namespace Installer
 
         public string Get_Etc_Iar_Path()
         {
-            return debugEtcPath;
+            return etcPath;
         }
 
         public string Get_Iar_Path()
