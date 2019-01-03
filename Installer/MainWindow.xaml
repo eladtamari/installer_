@@ -24,8 +24,9 @@
             <Label x:Name="l_voltage_header" Content="Voltage:" HorizontalAlignment="Left" Margin="663,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.737,0.192"/>
             <Label x:Name="l_version_engine" Content="Current engine" HorizontalAlignment="Left" Margin="433,111,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.105,0.077"/>
             <Label x:Name="l_engine_val" Content="None" HorizontalAlignment="Left" Margin="522,111,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="l_installed_apps" Content="Installed apps" HorizontalAlignment="Left" Margin="23,190,0,0" VerticalAlignment="Top"/>
         </Grid>
-        <ProgressBar HorizontalAlignment="Left" Height="14" Margin="44,305,0,0" VerticalAlignment="Top" Width="811"/>
+        <ProgressBar x:Name="Progress_bar" HorizontalAlignment="Left" Height="14" Margin="44,305,0,0" VerticalAlignment="Top" Width="811"/>
         <Grid HorizontalAlignment="Left" Height="176" Margin="10,328,0,-4" VerticalAlignment="Top" Width="861">
             <ScrollViewer Name="Scroller" Margin="0" Background="#262626">
                 <StackPanel>

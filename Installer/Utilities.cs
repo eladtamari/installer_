@@ -23,6 +23,7 @@ namespace Installer
         }
        
         Constants con = new Constants();
+        public static int Progress { get; set; }
         public static bool Pause { get; set; }
         public string Output { get; set; }
         public static string BackColor { get; set; }
@@ -76,15 +77,10 @@ namespace Installer
                 }
             }
         }
-        
-       
 
 
         public ConsoleContent dc { get; set; }
        
-
-
-         
 
         //Check if device connected
         public string Find_File(string hint)
@@ -182,7 +178,7 @@ namespace Installer
             
             process.Start();
             Console.Write(process.Id.ToString());
-            if (process.WaitForExit(2000))
+            if (process.WaitForExit(60000))
             {
                 var exitCode = process.ExitCode;
             }

@@ -34,8 +34,7 @@ namespace Installer
         public string Serial_Val { get; set; }
         Utilities util = new Utilities();
         Constants con = new Constants();
-
-
+               
         // public DataContext MyProperty { get; set; }
         public MainWindow()
         {
@@ -55,7 +54,8 @@ namespace Installer
 
             BackgroundWorker worker_check_release = new BackgroundWorker();
             worker_check_release.DoWork += worker_CheckRelease;
-            worker_check_release.RunWorkerAsync();
+            worker_check_release.RunWorkerAsync();            
+          
 
             //util.PropertyChanged += util.Configuration_PropertyChanged;
 
@@ -81,8 +81,7 @@ namespace Installer
 
         }
 
-
-
+       
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             InputBlock.KeyDown += InputBlock_KeyDown;
@@ -265,6 +264,13 @@ namespace Installer
             {
 
                 //(sender as BackgroundWorker).ReportProgress(Configuration.Instance.ProgressValue);
+
+                this.Dispatcher.Invoke(() =>
+                {
+                    Progress_bar.Value = Utilities.Progress;
+
+                });
+                
                 this.Dispatcher.Invoke(() =>
                 {
                    l_connected.Content = Utilities.ConnectionVal;
@@ -348,10 +354,14 @@ namespace Installer
                 dirs = dialog.FileNames.ToArray();
             }
             Install install = new Install();
+            
             if (Directory.Exists(dirs[0]))
-                Task.Run(() => install.Install_APKs(dirs[0]));
-            else
-                throw new FileNotFoundException(string.Format("Cant find path {0}", dirs[0]));
+            {
+
+                var run = Task.Run(() => install.Install_APKs(dirs[0])).ContinueWith(failedTask => Console.WriteLine("APK is already installed"),
+                               TaskContinuationOptions.OnlyOnFaulted); 
+            }
+            
             
         }
 

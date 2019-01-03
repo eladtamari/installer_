@@ -19,15 +19,29 @@ namespace Installer
             Utilities util = new Utilities();
             Constants con = new Constants();
            
+           
             string[] filePaths = Directory.GetFiles(dir, "*.apk",
                                          SearchOption.TopDirectoryOnly);
-
+            int l = 0;
+            l = filePaths.Length;
+            int count = 100 / l;
+            Utilities.Progress = 5;
             foreach (var apk in filePaths)
             {
+                               
                 string cmd = string.Format("adb install {0}", apk);
-                util.proc(cmd);
-                Thread.Sleep(5000);
+                util.proc(cmd);                
+                Regex rx = new Regex(@"Success");
+                Match match = rx.Match(util.Output);
+                if (!match.Success)
+                    Console.WriteLine("APK alreasy Exist");
+                Utilities.Progress = l + count;
+                
+                
             }
+            Utilities.Progress = 0;
+
+            
 
         }
         
@@ -38,7 +52,11 @@ namespace Installer
             JsonParser J_S = new JsonParser();
             FirsrHirc jsonObject = J_S.Parse();
 
-            
+            int l = 0;
+            string[] filePaths = Directory.GetFiles(installDir[0], "*.img",
+                                         SearchOption.TopDirectoryOnly);
+           
+
             try
             {
                 util.Check_devices();
@@ -69,7 +87,9 @@ namespace Installer
             }
 
             Utilities.Pause = true;
-
+            l = jsonObject.install.list.Count;
+            int count = 100 / l;
+            Utilities.Progress = 10;
             foreach (var obj in jsonObject.install.list)
             {
                 boot = string.Format(@"fastboot flash {0} {1}\{2}", obj.partition, installDir[0], obj.image);
@@ -81,12 +101,15 @@ namespace Installer
                     Thread.Sleep(5000);
                     i++;
                 }
-                                                          
+
+                Utilities.Progress = l + count;                 
             }
             Utilities.Pause = false;
 
+            
             boot = "fastboot reboot";
             util.proc(boot);
+            Utilities.Progress = 0;
 
         }
     }
