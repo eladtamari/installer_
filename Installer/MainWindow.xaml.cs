@@ -346,6 +346,8 @@ namespace Installer
 
         private void b_install_apk_Click(object sender, RoutedEventArgs e)
         {
+            util.dc.ConsoleInput = "Installing APKs";
+            util.dc.RunCommand();
             string[] dirs = { };
             var dialog = new CommonOpenFileDialog();
             dialog.IsFolderPicker = true;
@@ -354,7 +356,12 @@ namespace Installer
                 dirs = dialog.FileNames.ToArray();
             }
             Install install = new Install();
-            
+
+            if (dirs.Length < 1)
+            {
+                util.dc.ConsoleInput = "Path wasn't specified, to complete APK install, give an exist path";
+                return;
+            }
             if (Directory.Exists(dirs[0]))
             {
 

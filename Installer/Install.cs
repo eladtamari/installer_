@@ -53,6 +53,11 @@ namespace Installer
             FirsrHirc jsonObject = J_S.Parse();
 
             int l = 0;
+
+            if (installDir.Length < 1)
+            {
+                return;
+            }
             string[] filePaths = Directory.GetFiles(installDir[0], "*.img",
                                          SearchOption.TopDirectoryOnly);
            
