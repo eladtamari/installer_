@@ -362,11 +362,35 @@ namespace Installer
                 util.dc.ConsoleInput = "Path wasn't specified, to complete APK install, give an exist path";
                 return;
             }
-            if (Directory.Exists(dirs[0]))
+
+            //show all apks in the folder
+            string[] filePaths = Directory.GetFiles(dirs[0], "*.apk",
+                                         SearchOption.TopDirectoryOnly);
+
+
+            string[] results = {};
+            var items = new installedItems(filePaths.ToList());
+            if ((bool)items.ShowDialog() == true)
+            {
+                results = System.IO.File.ReadAllLines(con.Get_ToInstall());
+                
+            }
+            
+            
+            //wait till the list of items to be installed return
+
+
+
+            if (results.Length > 0)
             {
 
-                var run = Task.Run(() => install.Install_APKs(dirs[0])).ContinueWith(failedTask => Console.WriteLine("APK is already installed"),
-                               TaskContinuationOptions.OnlyOnFaulted); 
+                var run = Task.Run(() => install.Install_APKs(results)).ContinueWith(failedTask => Console.WriteLine("APK is already installed"),
+                               TaskContinuationOptions.OnlyOnFaulted);
+            }
+            else
+            {
+                util.dc.ConsoleInput = "No APK to install, pick an apk to install";
+                util.dc.RunCommand();
             }
             
             

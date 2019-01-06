@@ -26,6 +26,7 @@ namespace Installer
             
         }
 
+        const string toInstall = "ToInstall.txt";
         const string jsonFile = "Config.JSON";
         const string connected = "Connected";
         const string disconnected = "Disconnected";
@@ -51,8 +52,11 @@ namespace Installer
        
         string fastBootDevices = "fastboot devices";
 
-        
-      
+
+        public string Get_ToInstall()
+        {
+            return toInstall;
+        }
 
         public string Get_Json_file_name()
         {

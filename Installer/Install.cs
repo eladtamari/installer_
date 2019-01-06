@@ -14,14 +14,12 @@ namespace Installer
     {
 
 
-        public void Install_APKs(string dir)
+        public void Install_APKs(string[] filePaths)
         {
             Utilities util = new Utilities();
             Constants con = new Constants();
            
            
-            string[] filePaths = Directory.GetFiles(dir, "*.apk",
-                                         SearchOption.TopDirectoryOnly);
             int l = 0;
             l = filePaths.Length;
             int count = 100 / l;
@@ -60,6 +58,7 @@ namespace Installer
             }
             string[] filePaths = Directory.GetFiles(installDir[0], "*.img",
                                          SearchOption.TopDirectoryOnly);
+
            
 
             try
