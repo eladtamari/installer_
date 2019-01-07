@@ -39,6 +39,14 @@ namespace Installer
         public MainWindow()
         {
             InitializeComponent();
+
+            string iconsPath;
+            //set the infinity icon
+            iconsPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "INFINITY_logo.jpg");
+            if (File.Exists(iconsPath))
+                logo.Source = new BitmapImage(new Uri(iconsPath, UriKind.RelativeOrAbsolute));
+          
+           
            
             BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += worker_DoWork;
@@ -101,18 +109,61 @@ namespace Installer
 
         private void b_install_Click(object sender, RoutedEventArgs e)
         {
-            string[] dirs = {};
+            string[] dir = { };
+            string[] results = {};
             var dialog = new CommonOpenFileDialog();
             dialog.IsFolderPicker = true;
+
             //CommonFileDialogResult result = dialog.ShowDialog();
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                 dirs = dialog.FileNames.ToArray();
+                dir = dialog.FileNames.ToArray();
             }
             Install install = new Install();
+            
+            if (dir.Length < 1)
+            {
+                util.dc.ConsoleInput = "no files found";
+                util.dc.RunCommand();
+                return;
+            }
 
             
-            var run = Task.Run(() => install.Enter_Boot_Loader(dirs)).ContinueWith(failedTask => Console.WriteLine("Device is not responding"),
+            string[] files = Directory.GetFiles(dir[0], "*.img",
+                                         SearchOption.TopDirectoryOnly);
+
+            List<string> files_ = new List<string>();
+            List<string> inGame = new List<string>();
+            
+            JsonParser J_S = new JsonParser();
+            FirsrHirc jsonObject = J_S.Parse();
+            var t = jsonObject.install.list;
+            
+            foreach (var im in t)
+                inGame.Add(im.image);
+            
+           foreach (var file in files)
+           {
+               string g = System.IO.Path.GetFileName(file);
+               if (inGame.Contains(g))
+                   files_.Add(file);
+             
+           }
+            
+
+            //show all apks in the folder
+            
+            var items = new installedItems(files_.ToList());
+            if (!(bool)items.ShowDialog() == true)
+            {
+                return;
+
+            }
+
+            
+
+            
+            var run = Task.Run(() => install.Enter_Boot_Loader()).ContinueWith(failedTask => Console.WriteLine("Device is not responding"),
                              TaskContinuationOptions.OnlyOnFaulted); 
             
         }

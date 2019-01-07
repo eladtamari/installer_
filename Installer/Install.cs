@@ -43,7 +43,7 @@ namespace Installer
 
         }
         
-        public void Enter_Boot_Loader(string[] installDir)
+        public void Enter_Boot_Loader()
         {
             Utilities util = new Utilities();
             Constants con = new Constants();
@@ -51,15 +51,6 @@ namespace Installer
             FirsrHirc jsonObject = J_S.Parse();
 
             int l = 0;
-
-            if (installDir.Length < 1)
-            {
-                return;
-            }
-            string[] filePaths = Directory.GetFiles(installDir[0], "*.img",
-                                         SearchOption.TopDirectoryOnly);
-
-           
 
             try
             {
@@ -90,16 +81,26 @@ namespace Installer
                 
             }
 
+            var results = System.IO.File.ReadAllLines(con.Get_ToInstall());
+            if (results.Length < 1)
+            {
+                return;
+            }   
+
             Utilities.Pause = true;
             l = jsonObject.install.list.Count;
             int count = 100 / l;
             Utilities.Progress = 10;
             foreach (var obj in jsonObject.install.list)
             {
-                boot = string.Format(@"fastboot flash {0} {1}\{2}", obj.partition, installDir[0], obj.image);
+                if (!results.Contains(obj.image))
+                    continue;
+               
+                boot = string.Format(@"fastboot flash {0} {1}\{2}", obj.partition, Path.GetDirectoryName(results[0]), obj.image);
                 util.proc(boot);
-                int i = 0;
+                    
                 
+                int i = 0;
                 while (!String.Equals(Utilities.ConnectionVal, "Fastboot") && i < 20 )
                 {
                     Thread.Sleep(5000);
