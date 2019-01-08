@@ -166,7 +166,7 @@ namespace Installer
         }
 
         
-        public void proc(string cmd, bool log = false)
+        public void proc(string cmd, bool log = false, int timeout = 60000)
         {
             //string output = "";
             if (log)
@@ -185,7 +185,7 @@ namespace Installer
             
             process.Start();
             Console.Write(process.Id.ToString());
-            if (process.WaitForExit(60000))
+            if (process.WaitForExit(timeout))
             {
                 var exitCode = process.ExitCode;
             }

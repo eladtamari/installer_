@@ -148,7 +148,7 @@ namespace Installer
 
         public string Push_Item(string item, string target)
         {
-            return String.Format("{0} {1} {2}", adb, push, item, target);
+            return String.Format("{0} {1} {2} {3}", adb, push, item, target);
         }
 
         public string[] Get_Cal_Files()

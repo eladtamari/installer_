@@ -12,26 +12,44 @@ namespace Installer
 {
     class PushPullFiles
     {
-        
-        
 
-        public void Push()
+        public PushPullFiles()
+        {
+            TextToLog = new Item();
+        }
+        public static Item TextToLog { get; set; }
+        public void Push(bool progress = false)
         {
             Constants con = new Constants();
             Utilities util = new Utilities();
             var t = util.Find_File(con.Get_Hexagon_File());
             //push hexagon file  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            util.proc(con.Push_Item(t, con.Hexagon()));
+            if (progress)
+                Utilities.Progress = 10;
+            util.proc(con.Push_Item(t, con.Hexagon()), true, 5000);
+            if (progress)
+                Utilities.Progress = 40;
+
 
             //push calib files
             foreach (string cal in con.Get_Cal_Files())
             {
-                util.proc(con.Push_Item(cal, con.Get_Iar_Path()));
+                util.proc(con.Push_Item(cal, con.Get_Iar_Path()), true, 5000);
+                if (progress)
+                    Utilities.Progress += 20;
+                
             }
+            if (progress)
+            {
+                Utilities.Progress = 100;
+                Thread.Sleep(1000);
+                Utilities.Progress = 0;
+            }
+
         }
 
         
-        public void Pull()
+        public void Pull(bool progress = false)
         {
             //ConsoleContent dc = new ConsoleContent();
             Utilities util = new Utilities();
@@ -39,16 +57,23 @@ namespace Installer
             // pull the hexagon
             try
             {
-                util.dc.ConsoleInput = "pull Hexagon";
-                util.proc(con.Pull_Item("", con.Hexagon()));
+                TextToLog.Text += string.Format("Pull Hexagon files");
+                if (progress)
+                    Utilities.Progress = 10;
+                util.proc(con.Pull_Item("", con.Hexagon()), true, 10000);
+                if (progress)
+                    Utilities.Progress = 30;
                 bool fe = File.Exists(con.Hexagon()) ? true : false;
                 if (!fe)
+                {
+                    TextToLog.Text += string.Format("couldn't find file {0}", con.Hexagon());
                     throw new FileNotFoundException();
+                }
 
             }
             catch (FileNotFoundException ex)
             {
-                util.dc.ConsoleInput = ex.Message.ToString();
+                TextToLog.Text += string.Format(ex.Message);
             }
 
             //pull the calibration files        
@@ -56,58 +81,84 @@ namespace Installer
             {
                 foreach (string cal in con.Get_Cal_Files())
                 {
-                    util.proc(con.Pull_Item(con.Get_Iar_Path(), cal));
+                    util.proc(con.Pull_Item(con.Get_Iar_Path(), cal), true, 20000);
+                    if (progress)
+                        Utilities.Progress += 25;
                     bool fe = File.Exists(cal) ? true : false;
                     if (!fe)
+                    {
+                        TextToLog.Text += string.Format("couldn't Pull file {0}", cal);
                         throw new FileNotFoundException();
+                    }
                 }
             }
             catch (FileNotFoundException ex)
             {
+                TextToLog.Text += string.Format(ex.Message);
                 Console.WriteLine(ex);
             }
 
             //pull the configuration files
             try
             {
-                util.proc(con.Pull_Item(con.Get_Iar_Path(), con.Get_Config_file()));
-                util.proc(con.Pull_Item(con.Get_Iar_Path(), con.Get_debugConfig_File()));
+                util.proc(con.Pull_Item(con.Get_Iar_Path(), con.Get_Config_file()), true, 10000);
+                if (progress)
+                    Utilities.Progress += 5;
+                util.proc(con.Pull_Item(con.Get_Iar_Path(), con.Get_debugConfig_File()), true, 10000);
 
                 foreach (var c in new string[] { con.Get_Config_file(), con.Get_debugConfig_File() })
                 {
                     bool fe = File.Exists(c) ? true : false;
                     if (!fe)
+                    {
+                        TextToLog.Text += string.Format("couldn't find file {0}", c);
                         throw new FileNotFoundException();
+                    }
                 }
             }
             catch (FileNotFoundException ex)
             {
+                TextToLog.Text += string.Format(ex.Message);
                 Console.WriteLine(ex);
             }
+            if (progress)
+            {
+                Utilities.Progress = 100;
+                Thread.Sleep(500);
+                Utilities.Progress = 0;
+            }
+
 
         }
 
-        public void pullEditPush()
+        public void pullEditPush(Utilities util)
         {
-            Utilities util = new Utilities();
+            //Utilities util = new Utilities();
             Constants con = new Constants();
-            util.proc(con.Pull_Item(con.Get_Iar_Path(), con.Get_debugConfig_File()));
+            Utilities.Progress = 10;
+            util.proc(con.Pull_Item(con.Get_Iar_Path(), con.Get_debugConfig_File()), true, 10000);
 
             //edit 
             try
             {
                 SearchEditValue();
+                Utilities.Progress = 50;
             }
             catch (Exception ex)
-            { 
+            {
+                TextToLog.Text += string.Format(ex.Message);
                 throw ex;
             }
 
 
             //to sdcard
-            util.proc(con.Push_Item(con.Get_debugConfig_File(), con.Get_Iar_Path()));
+            util.proc(con.Push_Item(con.Get_debugConfig_File(), con.Get_Iar_Path()), true, 10000);
+            Utilities.Progress = 70;
             //to etc
-            util.proc(con.Push_Item(con.Get_debugConfig_File(), con.Get_Etc_Iar_Path()));
+            util.proc(con.Push_Item(con.Get_debugConfig_File(), con.Get_Etc_Iar_Path()), true, 10000);
+            Utilities.Progress = 100;
+            Thread.Sleep(500);
+            Utilities.Progress = 0;
 
 
         }
@@ -117,10 +168,14 @@ namespace Installer
         {
             Constants con = new Constants();
             bool flag = false;
+            
             var t = File.ReadLines(con.Get_debugConfig_File());
 
             if (t.Count() == 0)
+            {
+                TextToLog.Text += string.Format("couldn't find file {0}", con.Get_debugConfig_File());
                 throw new FileNotFoundException();
+            }
 
             string[] f = t.ToArray();
             
@@ -141,11 +196,24 @@ namespace Installer
                     flag = true;
                     f[i] = "disableAllLogs = false";
                     string d = string.Join("\n", f);
+                    try
+                    {
+                        File.WriteAllText(con.Get_debugConfig_File(), d);
+                    }
+                    catch (Exception ex)
+                    {
+                        TextToLog.Text += "cannot write into the debugConfig.ini";
+                        throw new Exception("cannot write into the debugConfig.ini");
+                        
+                    }
                     break;
                 }
             }
             if (!flag)
+            {
+                TextToLog.Text += "couldn't find match for disableAllLogs.*";
                 throw new InvalidDataException();
+            }
 
             
         }

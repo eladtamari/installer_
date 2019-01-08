@@ -32,6 +32,7 @@ namespace Installer
         public string Serial_Val { get; set; }
         Utilities util = new Utilities();
         Constants con = new Constants();
+        public Item Error { get; set; }
         
         public static ObservableCollection<Item> logItems; 
        
@@ -180,23 +181,39 @@ namespace Installer
 
         private void b_pull_Click(object sender, RoutedEventArgs e)
         {
-
-            util.dc.ConsoleInput = "Start Pull Files...";
-            var t = Task.Run(() => pull());
-            util.dc.ConsoleInput = "Done Pull Files...";
+            var uiContext = SynchronizationContext.Current;
+            var t = Task.Run(() => pull()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+                     
         }
 
         private void b_push_Click(object sender, RoutedEventArgs e)
         {
-            util.dc.ConsoleInput = "Start Push Files...";
-            var t = Task.Run(() => push());
-            util.dc.ConsoleInput = "Done Push Files...";
+            var uiContext = SynchronizationContext.Current;
+            var t = Task.Run(() => push()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+            if (Utilities.Progress == 100)
+                if (t.Status == TaskStatus.Faulted)
+                {
+                    foreach (var i in t.Exception.InnerExceptions)
+                    {
+                        Error.Text = i.Message;
+                        logItems.Add(Error);
+                    
+                    }
+                }
+            
 
         }
 
         private void b_enable_disable_debug_Click(object sender, RoutedEventArgs e)
         {
-            var t = Task.Run(() => pullEditPush());
+            var uiContext = SynchronizationContext.Current;
+            this.Dispatcher.Invoke((Action)delegate
+            {
+
+                Task.Run(() => pullEditPush()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+
+            });
+            //var t = Task.Run(() => pullEditPush());
         }
 
         private void pull()
@@ -206,7 +223,7 @@ namespace Installer
             try
             {
                 util.Check_devices();
-                pushPull.Pull();
+                pushPull.Pull(true);
             }
             catch (Exception ex)
             {
@@ -217,8 +234,7 @@ namespace Installer
 
         private void push()
         {
-            Utilities util = new Utilities();
-            util.dc.ConsoleInput = "Start Pushing";
+            Utilities util = new Utilities();            
             Constants con = new Constants();
 
             PushPullFiles pushPull = new PushPullFiles();
@@ -227,22 +243,24 @@ namespace Installer
             try
             {
                 util.Check_devices();
-                pushPull.Push();
+                pushPull.Push(true);
             }
             catch (Exception ex)
             {
-                Console.Write(ex);
+               // throw new Exception("Cant push files");
+               
             }
         }
 
         private void pullEditPush()
         {
+        
             Utilities util = new Utilities();
             PushPullFiles pushPull = new PushPullFiles();
             try
             {
                 util.Check_devices();
-                pushPull.pullEditPush();
+                pushPull.pullEditPush(util);
             }
             catch (Exception ex)
             {
