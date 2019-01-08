@@ -14,14 +14,18 @@ namespace Installer
 {
     class Utilities : INotifyPropertyChanged
     {
+        
         public Utilities()
         {
             dc = new ConsoleContent();
             ConnectionColor = Constants.Fastboot_Color;
             BackColor = Constants.Fail_Color;
+
+            TextToLog = new Item();
             
         }
-       
+
+        public static Item TextToLog { get; set; }
         Constants con = new Constants();
         public static int Progress { get; set; }
         public static bool Pause { get; set; }
@@ -162,9 +166,12 @@ namespace Installer
         }
 
         
-        public void proc(string cmd)
+        public void proc(string cmd, bool log = false)
         {
             //string output = "";
+            if (log)
+                TextToLog.Text += string.Format("{0}\n", cmd);
+                //TextToLog = new Item() { Text = string.Format("{0}\n",cmd)};
             Process process = new Process();
             process.StartInfo.FileName = "cmd.exe";
             process.StartInfo.Arguments = String.Format("/c {0}", cmd);
@@ -184,6 +191,8 @@ namespace Installer
             }
             else
             {
+                if (log)
+                    TextToLog.Text += string.Format("Process has exited with timeout\n");
                 //process.Close();
                 if (process.Id != null)
                     if (!process.HasExited)
@@ -200,6 +209,8 @@ namespace Installer
             {
                 string line = process.StandardOutput.ReadLine();
                 Output += String.Format("{0}\n",line);
+                if (log)
+                    TextToLog.Text += string.Format("{0}\n", line);
 
             }//while
 

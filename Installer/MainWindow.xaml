@@ -31,15 +31,15 @@
         <ProgressBar x:Name="Progress_bar" HorizontalAlignment="Left" Height="14" Margin="34,233,0,0" VerticalAlignment="Top" Width="811"/>
         <Grid HorizontalAlignment="Left" Height="176" Margin="10,315,0,0" VerticalAlignment="Top" Width="861">
             <ScrollViewer Name="Scroller" Margin="0,-57,0,57" Background="#262626">
-                <StackPanel>
-                    <ItemsControl ItemsSource="{Binding ConsoleOutput, Mode=OneWay}">
+                <StackPanel Grid.Row="0" Grid.Column="1">
+                    <ItemsControl  Name="log" ItemsSource="{Binding logItems, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Path=.}" Foreground="White" FontFamily="Consolas"/>
+                                <TextBlock Text="{Binding Text}" Foreground="White" FontFamily="Consolas"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <TextBox Text="{Binding ConsoleInput, Mode=TwoWay}" Background="#808080" Foreground="White" FontFamily="Consolas" Name="InputBlock" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" />
+
                 </StackPanel>
             </ScrollViewer>
         </Grid>

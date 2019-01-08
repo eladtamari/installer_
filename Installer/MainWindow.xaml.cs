@@ -18,6 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Collections.ObjectModel;
 
 namespace Installer
 {
@@ -26,19 +27,22 @@ namespace Installer
     /// </summary>
     public partial class MainWindow : Window
     {
-        //ConsoleContent dc = new ConsoleContent();
-        //public string Connection_Val { get; set; }
-        //public string Connection_Color { get; set; }
         
         public string Release_Val { get; set; }
         public string Serial_Val { get; set; }
         Utilities util = new Utilities();
         Constants con = new Constants();
-               
-        // public DataContext MyProperty { get; set; }
+        
+        public static ObservableCollection<Item> logItems; 
+       
         public MainWindow()
         {
             InitializeComponent();
+            logItems = new ObservableCollection<Item>()
+            {
+            new Item(){Text="Logger"}
+            };
+            log.ItemsSource = logItems;
 
             string iconsPath;
             //set the infinity icon
@@ -70,7 +74,7 @@ namespace Installer
 
             // util.dc = new ConsoleContent();
             DataContext = util.dc;
-            Loaded += MainWindow_Loaded;
+           // Loaded += MainWindow_Loaded;
             var t = Task.Run(() =>
             {
                 try
@@ -90,22 +94,22 @@ namespace Installer
         }
 
        
-        void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            InputBlock.KeyDown += InputBlock_KeyDown;
-            InputBlock.Focus();
-        }
+        //void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        //{
+        //    InputBlock.KeyDown += InputBlock_KeyDown;
+        //    InputBlock.Focus();
+        //}
 
-        void InputBlock_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                util.dc.ConsoleInput = InputBlock.Text;
-                util.dc.RunCommand();
-                InputBlock.Focus();
-                Scroller.ScrollToBottom();
-            }
-        }
+        //void InputBlock_KeyDown(object sender, KeyEventArgs e)
+        //{
+        //    if (e.Key == Key.Enter)
+        //    {
+        //        util.dc.ConsoleInput = InputBlock.Text;
+        //        util.dc.RunCommand();
+        //        InputBlock.Focus();
+        //        Scroller.ScrollToBottom();
+        //    }
+        //}
 
         private void b_install_Click(object sender, RoutedEventArgs e)
         {
@@ -160,11 +164,17 @@ namespace Installer
 
             }
 
-            
 
+            var uiContext = SynchronizationContext.Current;
+            this.Dispatcher.Invoke((Action)delegate
+            {
+
+                Task.Run(() => install.Enter_Boot_Loader()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+
+            });
             
-            var run = Task.Run(() => install.Enter_Boot_Loader()).ContinueWith(failedTask => Console.WriteLine("Device is not responding"),
-                             TaskContinuationOptions.OnlyOnFaulted); 
+            //var run = Task.Run(() => install.Enter_Boot_Loader()).ContinueWith(failedTask => Console.WriteLine("Device is not responding"),
+            //                 TaskContinuationOptions.OnlyOnFaulted); 
             
         }
 
@@ -431,12 +441,19 @@ namespace Installer
             //wait till the list of items to be installed return
 
 
-
+            var uiContext = SynchronizationContext.Current;
             if (results.Length > 0)
             {
+                this.Dispatcher.Invoke((Action)delegate
+                {
 
-                var run = Task.Run(() => install.Install_APKs(results)).ContinueWith(failedTask => Console.WriteLine("APK is already installed"),
-                               TaskContinuationOptions.OnlyOnFaulted);
+                    Task.Run(() => install.Install_APKs(results)).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+
+                });
+            
+
+                //var run = Task.Run(() => install.Install_APKs(results)).ContinueWith(failedTask => Console.WriteLine("APK is already installed"),
+                //               TaskContinuationOptions.OnlyOnFaulted);
             }
             else
             {
@@ -449,4 +466,11 @@ namespace Installer
 
        
     }
+
+
+public class Item
+{
+    public string Text { get; set; }
+}
+
 }

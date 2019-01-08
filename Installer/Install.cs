@@ -28,7 +28,7 @@ namespace Installer
             {
                                
                 string cmd = string.Format("adb install {0}", apk);
-                util.proc(cmd);                
+                util.proc(cmd, true);                
                 Regex rx = new Regex(@"Success");
                 Match match = rx.Match(util.Output);
                 if (!match.Success)
@@ -65,11 +65,12 @@ namespace Installer
 
             if (!string.Equals(Utilities.ConnectionVal, "Fastboot"))
             {
-                util.proc(boot);
+                util.proc(boot, true);
                 string out_ = util.Output;
 
                 try
                 {
+                    Thread.Sleep(1000);
                     util.Check_devices();
                 }
                 catch
@@ -91,13 +92,21 @@ namespace Installer
             l = jsonObject.install.list.Count;
             int count = 100 / l;
             Utilities.Progress = 10;
+            bool flag;
             foreach (var obj in jsonObject.install.list)
             {
-                if (!results.Contains(obj.image))
+                flag = false;
+                foreach (var j in results)
+                    if (j.Contains(obj.image))
+                    {
+                        flag = true;
+                        break;
+                    }
+                if (!flag)
                     continue;
                
                 boot = string.Format(@"fastboot flash {0} {1}\{2}", obj.partition, Path.GetDirectoryName(results[0]), obj.image);
-                util.proc(boot);
+                util.proc(boot, true);
                     
                 
                 int i = 0;
@@ -113,7 +122,7 @@ namespace Installer
 
             
             boot = "fastboot reboot";
-            util.proc(boot);
+            util.proc(boot, true);
             Utilities.Progress = 0;
 
         }
