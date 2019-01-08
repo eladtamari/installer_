@@ -188,6 +188,35 @@ namespace Installer
 
         private void b_push_Click(object sender, RoutedEventArgs e)
         {
+
+            string[] dirs = { };
+            var dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                dirs = dialog.FileNames.ToArray();
+            }
+            Install install = new Install();
+
+            if (dirs.Length < 1)
+            {
+                util.dc.ConsoleInput = "Path wasn't specified, to complete APK install, give an exist path";
+                return;
+            }
+
+            //show all apks in the folder
+            string[] filePaths = Directory.GetFiles(dirs[0], "*.*",
+                                         SearchOption.AllDirectories);
+
+
+            string[] results = { };
+            var items = new installedItems(filePaths.ToList());
+            if ((bool)items.ShowDialog() == true)
+            {
+                results = System.IO.File.ReadAllLines(con.Get_ToInstall());
+
+            }
+            
             var uiContext = SynchronizationContext.Current;
             var t = Task.Run(() => push()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
             if (Utilities.Progress == 100)
@@ -425,8 +454,7 @@ namespace Installer
 
         private void b_install_apk_Click(object sender, RoutedEventArgs e)
         {
-            util.dc.ConsoleInput = "Installing APKs";
-            util.dc.RunCommand();
+            
             string[] dirs = { };
             var dialog = new CommonOpenFileDialog();
             dialog.IsFolderPicker = true;

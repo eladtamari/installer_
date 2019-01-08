@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -22,11 +23,42 @@ namespace Installer
         {
             Constants con = new Constants();
             Utilities util = new Utilities();
-            var t = util.Find_File(con.Get_Hexagon_File());
+            
+            //var t = util.Find_File(con.Get_Hexagon_File());
+            //if (string.IsNullOrEmpty(t))
+            //{
+                //string[] dirs = { };
+                //var dialog = new CommonOpenFileDialog();
+                //dialog.IsFolderPicker = false;
+                //if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+                //{
+                //    dirs = dialog.FileNames.ToArray();
+                //}
+                ////Install install = new Install();
+
+                //if (dirs.Length < 1)
+                //{
+                   
+                //    return;
+                //}
+                
+
+                //if (dirs.Length < 1)
+                //{
+                //    util.dc.ConsoleInput = "no files found";
+                //    util.dc.RunCommand();
+                //    return;
+                //}
+
+
+                //string[] files = Directory.GetFiles(dirs[0], "testing.*",
+                //                             SearchOption.TopDirectoryOnly);
+            
+
             //push hexagon file  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             if (progress)
                 Utilities.Progress = 10;
-            util.proc(con.Push_Item(t, con.Hexagon()), true, 5000);
+           // util.proc(con.Push_Item(t, con.Hexagon()), true, 5000);
             if (progress)
                 Utilities.Progress = 40;
 

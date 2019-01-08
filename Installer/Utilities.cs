@@ -93,7 +93,10 @@ namespace Installer
             
             //FileInfo[] filesInDir = hdDirectoryInWhichToSearch.GetFiles("*" + hint + "*.*");
             FileInfo[] files = dir.GetFiles(string.Format("{0}*", hint), SearchOption.TopDirectoryOnly);
-            return files.First().ToString();
+            if (files.Length > 0)
+                return files.First().ToString();
+            else
+                return "";
             
         }
 

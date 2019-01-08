@@ -24,9 +24,12 @@ namespace Installer
         public installedItems(List<string> appList)
         {
             InitializeComponent();
-            
+
             foreach (var item in appList)
-                items1.Add(new CheckBoxListItem(true, item));      
+            {
+
+                items1.Add(new CheckBoxListItem(true, item));
+            }
          
             
             lstExclude.ItemsSource = items1;
@@ -85,6 +88,37 @@ namespace Installer
 
                 
                 return output; }
+        }
+
+        private void cb_all_Change(object sender, RoutedEventArgs e)
+        {
+            if (!Convert.ToBoolean(cb_all.IsChecked))
+            {
+
+                foreach (var i in items1)
+                {
+                    i.Checked = false;
+                }
+            }
+            else if (Convert.ToBoolean(cb_all.IsChecked))
+            {
+                lstExclude.SelectAll();
+                foreach (var i in items1)
+                {
+                    i.Checked = true;
+                }
+
+            }
+
+            lstExclude.Items.Refresh();
+
+
+
+            
+            
+
+
+
         }
        
     }
