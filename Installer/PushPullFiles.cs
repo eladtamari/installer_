@@ -19,51 +19,33 @@ namespace Installer
             TextToLog = new Item();
         }
         public static Item TextToLog { get; set; }
-        public void Push(bool progress = false)
+        
+        public void PushHex(string[] results, bool progress = false)
         {
             Constants con = new Constants();
             Utilities util = new Utilities();
-            
-            //var t = util.Find_File(con.Get_Hexagon_File());
-            //if (string.IsNullOrEmpty(t))
-            //{
-                //string[] dirs = { };
-                //var dialog = new CommonOpenFileDialog();
-                //dialog.IsFolderPicker = false;
-                //if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
-                //{
-                //    dirs = dialog.FileNames.ToArray();
-                //}
-                ////Install install = new Install();
-
-                //if (dirs.Length < 1)
-                //{
-                   
-                //    return;
-                //}
-                
-
-                //if (dirs.Length < 1)
-                //{
-                //    util.dc.ConsoleInput = "no files found";
-                //    util.dc.RunCommand();
-                //    return;
-                //}
+                       
 
 
-                //string[] files = Directory.GetFiles(dirs[0], "testing.*",
-                //                             SearchOption.TopDirectoryOnly);
-            
-
-            //push hexagon file  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             if (progress)
                 Utilities.Progress = 10;
-           // util.proc(con.Push_Item(t, con.Hexagon()), true, 5000);
+            util.proc(con.Push_Item(results[0], con.Get_Iar_Path()), true, 5000);
             if (progress)
-                Utilities.Progress = 40;
+            {
+                Utilities.Progress = 100;
+                Thread.Sleep(1000);
+                Utilities.Progress = 0;
+            }
+        }
+          
 
-
+        public void PushCalib(string[] results, bool progress = false)
+        {
             //push calib files
+            Constants con = new Constants();
+            Utilities util = new Utilities();
+            if (progress)
+                Utilities.Progress = 20;
             foreach (string cal in con.Get_Cal_Files())
             {
                 util.proc(con.Push_Item(cal, con.Get_Iar_Path()), true, 5000);

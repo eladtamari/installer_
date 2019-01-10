@@ -186,9 +186,10 @@ namespace Installer
                      
         }
 
-        private void b_push_Click(object sender, RoutedEventArgs e)
+        private void b_push_hex_Click(object sender, RoutedEventArgs e)
         {
-
+            
+                
             string[] dirs = { };
             var dialog = new CommonOpenFileDialog();
             dialog.IsFolderPicker = true;
@@ -218,7 +219,10 @@ namespace Installer
             }
             
             var uiContext = SynchronizationContext.Current;
-            var t = Task.Run(() => push()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+
+            
+
+            var  t = Task.Run(() => pushHex(results)).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
             if (Utilities.Progress == 100)
                 if (t.Status == TaskStatus.Faulted)
                 {
@@ -233,6 +237,58 @@ namespace Installer
 
         }
 
+        private void b_push_cal_Click(object sender, RoutedEventArgs e)
+        {
+
+
+            string[] dirs = { };
+            var dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                dirs = dialog.FileNames.ToArray();
+            }
+            Install install = new Install();
+
+            if (dirs.Length < 1)
+            {
+                util.dc.ConsoleInput = "Path wasn't specified, to complete APK install, give an exist path";
+                return;
+            }
+
+            //show all apks in the folder
+            string[] filePaths = Directory.GetFiles(dirs[0], "*.cal",
+                                         SearchOption.AllDirectories);
+
+
+            string[] results = { };
+            var items = new installedItems(filePaths.ToList());
+            if ((bool)items.ShowDialog() == true)
+            {
+                results = System.IO.File.ReadAllLines(con.Get_ToInstall());
+
+            }
+
+            var uiContext = SynchronizationContext.Current;
+
+
+
+            var t = Task.Run(() => pushCalib(results)).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+            if (Utilities.Progress == 100)
+                if (t.Status == TaskStatus.Faulted)
+                {
+                    foreach (var i in t.Exception.InnerExceptions)
+                    {
+                        Error.Text = i.Message;
+                        logItems.Add(Error);
+
+                    }
+                }
+
+
+        }
+
+        
         private void b_enable_disable_debug_Click(object sender, RoutedEventArgs e)
         {
             var uiContext = SynchronizationContext.Current;
@@ -261,7 +317,7 @@ namespace Installer
 
         }
 
-        private void push()
+        private void pushHex(string[] results)
         {
             Utilities util = new Utilities();            
             Constants con = new Constants();
@@ -272,12 +328,34 @@ namespace Installer
             try
             {
                 util.Check_devices();
-                pushPull.Push(true);
+                
+                pushPull.PushHex(results, true);
             }
             catch (Exception ex)
             {
                // throw new Exception("Cant push files");
                
+            }
+        }
+
+        private void pushCalib(string[] results)
+        {
+            Utilities util = new Utilities();
+            Constants con = new Constants();
+
+            PushPullFiles pushPull = new PushPullFiles();
+
+
+            try
+            {
+                util.Check_devices();
+
+                pushPull.PushCalib(results, true);
+            }
+            catch (Exception ex)
+            {
+                // throw new Exception("Cant push files");
+
             }
         }
 
