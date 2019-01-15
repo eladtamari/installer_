@@ -106,19 +106,27 @@ namespace Installer
         {
             Constants con = new Constants();
             string cmd = string.Format("adb shell \"sh {0}/{1}\"",con.Get_Etc_Iar_Path(), con.Get_Versions());
+            
+            TextToLog.Text += string.Format("{0}\n", cmd);
                         
             proc(cmd);
             var o = Output;
             Regex rx = new Regex(@"Build.*");
             Match match = rx.Match(Output);
             if (!match.Success)
+            {
+                TextToLog.Text += string.Format("couldn't receive the build number\n");
                 throw new NullReferenceException();
+            }
             Release = match.Value;
            
             Regex rx1 = new Regex(@"IAR Engine Version.*");
             Match match1 = rx1.Match(o);
             if (!match1.Success)
+            {
+                TextToLog.Text += string.Format("couldn't receive the Engine Version\n");
                 throw new NullReferenceException();
+            }
             Engine = match1.Value;
             
             Output = "";
@@ -146,6 +154,7 @@ namespace Installer
         {
             Constants con = new Constants();
             proc(con.Get_Devices());
+            Thread.Sleep(1000);
             Regex rx = new Regex(@"\D+\d+.*\t");
             Match match = rx.Match(Output);
             Output = "";

@@ -68,7 +68,7 @@ namespace Installer
 
             BackgroundWorker worker_check_release = new BackgroundWorker();
             worker_check_release.DoWork += worker_CheckRelease;
-            worker_check_release.RunWorkerAsync();            
+            //worker_check_release.RunWorkerAsync();            
           
 
           
@@ -77,6 +77,8 @@ namespace Installer
                 try
                 {
                     util.Check_devices();
+                    Thread.Sleep(1000);
+                    l_serial_val.Content = Utilities.SerialNum;
                   
                 }
                 catch (Exception ex)
@@ -424,6 +426,23 @@ namespace Installer
             }
         }
 
+
+        private void Check_Release_and_Engine()
+        {
+            try
+            {
+                util.Get_Release_and_Engine_Version();
+                Thread.Sleep(1000);
+                l_release_val.Content = Utilities.Release;
+
+            }
+            catch (Exception ex)
+            {
+
+                //throw ex;
+            }
+        }
+
         void worker_CheckRelease(object sender, DoWorkEventArgs e)
         {
             while (true)
@@ -491,11 +510,11 @@ namespace Installer
 
                 if (!Utilities.Pause)
                 {
-                    this.Dispatcher.Invoke(() =>
-                   {
-                       l_serial_val.Content = Utilities.SerialNum;
+                   // this.Dispatcher.Invoke(() =>
+                   //{
+                   //    l_serial_val.Content = Utilities.SerialNum;
 
-                   });
+                   //});
 
                     this.Dispatcher.Invoke(() =>
                     {
@@ -510,17 +529,17 @@ namespace Installer
 
                     });
 
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        l_release_val.Content = Utilities.Release;
+                    //this.Dispatcher.Invoke(() =>
+                    //{
+                    //    l_release_val.Content = Utilities.Release;
 
-                    });
+                    //});
 
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        l_engine_val.Content = Utilities.Engine;
+                    //this.Dispatcher.Invoke(() =>
+                    //{
+                    //    l_engine_val.Content = Utilities.Engine;
 
-                    });
+                    //});
 
                 }
                 else 
@@ -530,17 +549,17 @@ namespace Installer
                        l_battery.Content = "N/A";
                    });
 
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        l_release_val.Content = "N/A";
+                    //this.Dispatcher.Invoke(() =>
+                    //{
+                    //    l_release_val.Content = "N/A";
 
-                    });
+                    //});
 
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        l_engine_val.Content = "N/A";
+                    //this.Dispatcher.Invoke(() =>
+                    //{
+                    //    l_engine_val.Content = "N/A";
 
-                    });
+                    //});
                 }
 
                 Thread.Sleep(1000);
@@ -607,6 +626,24 @@ namespace Installer
             
             
         }
+
+        private void b_refresh_Click(object sender, RoutedEventArgs e)
+        {
+            var uiContext = SynchronizationContext.Current;
+
+            this.Dispatcher.Invoke((Action)delegate
+            {
+
+                Task.Run(() => Check_Release_and_Engine()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+                Task.Run(() => util.Check_devices()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+                Thread.Sleep(2000);
+                l_serial_val.Content = Utilities.SerialNum;
+
+            });
+
+            
+        }
+           
 
        
     }
