@@ -74,13 +74,13 @@ namespace Installer
                 TextToLog.Text += string.Format("Pull Hexagon files");
                 if (progress)
                     Utilities.Progress = 10;
-                util.proc(con.Pull_Item("", con.Hexagon()), true, 10000);
+                util.proc(con.Pull_Item("", con.Get_Hexagon()), true, 10000);
                 if (progress)
                     Utilities.Progress = 30;
-                bool fe = File.Exists(con.Hexagon()) ? true : false;
+                bool fe = File.Exists(con.Get_Hexagon()) ? true : false;
                 if (!fe)
                 {
-                    TextToLog.Text += string.Format("couldn't find file {0}", con.Hexagon());
+                    TextToLog.Text += string.Format("couldn't find file {0}", con.Get_Hexagon());
                     throw new FileNotFoundException();
                 }
 

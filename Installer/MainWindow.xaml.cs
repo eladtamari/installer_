@@ -19,6 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 
 namespace Installer
 {
@@ -70,12 +71,7 @@ namespace Installer
             worker_check_release.RunWorkerAsync();            
           
 
-            //util.PropertyChanged += util.Configuration_PropertyChanged;
-
-
-            // util.dc = new ConsoleContent();
-            DataContext = util.dc;
-           // Loaded += MainWindow_Loaded;
+          
             var t = Task.Run(() =>
             {
                 try
@@ -94,23 +90,7 @@ namespace Installer
 
         }
 
-       
-        //void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        //{
-        //    InputBlock.KeyDown += InputBlock_KeyDown;
-        //    InputBlock.Focus();
-        //}
-
-        //void InputBlock_KeyDown(object sender, KeyEventArgs e)
-        //{
-        //    if (e.Key == Key.Enter)
-        //    {
-        //        util.dc.ConsoleInput = InputBlock.Text;
-        //        util.dc.RunCommand();
-        //        InputBlock.Focus();
-        //        Scroller.ScrollToBottom();
-        //    }
-        //}
+      
 
         private void b_install_Click(object sender, RoutedEventArgs e)
         {
@@ -186,54 +166,94 @@ namespace Installer
                      
         }
 
+
+
+        public void Create_Hexagon()
+        {
+            Utilities util = new Utilities();
+            Utilities.Progress = 10;
+            string hexGetId = string.Format(@"adb shell cat {0}", con.Get_Soc0_Id());
+            util.proc(hexGetId, true);
+
+            //search for hexagon 10 digits integer number
+            Regex re = new Regex(@"\d+");
+            Match matchHex = re.Match(util.Output);
+            if (!matchHex.Success)
+                Console.WriteLine("couldn't find hexagon decimal id");
+
+            //turn number hexagon to hexadecimal
+            long decValue = Convert.ToInt64(matchHex.Value, 10);
+            string hexValue = decValue.ToString("X");
+
+            Utilities.Progress = 20;
+            //set dir to where hexagon factory ask it 
+            string originDir = Directory.GetCurrentDirectory();
+            Directory.SetCurrentDirectory(string.Format(@"../../{0}", con.Get_Elfsigner()));
+            string o = Directory.GetCurrentDirectory();
+            Console.WriteLine(o);
+            Utilities.Progress = 25;
+            util.Output = "";
+            //string y = Directory.GetCurrentDirectory();
+            string v = string.Format("..\\python\\python.exe {0} -t 0x{1} \ny\n", con.Get_Elfsigner_Py(), hexValue);
+            try
+            {
+                util.proc(v, true, 3000, false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                util.Err += ex.Message;
+            }
+            Utilities.Progress = 60;
+
+            int cnt = 0;
+            bool t = false;
+            while (!t && cnt < 20)
+            {
+                t = Directory.EnumerateFiles(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "output"), "test*.so").Any() ? true : false;
+                cnt++;
+                Thread.Sleep(1000);
+            }
+
+            if (!t)
+                return;
+
+            //root remount
+            string root = "adb root";
+            util.proc(root, true);
+
+            Thread.Sleep(1000);
+            string remount = "adb remount";
+            util.proc(remount, true);
+            Utilities.Progress = 66;
+
+            var myFiles = Directory.GetFiles(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "output"), "*.so", SearchOption.TopDirectoryOnly);
+                
+            //push the hexagon file to the glasses
+            string pushHex = string.Format("adb push {0} /system/lib/rfsa/adsp", myFiles[0]);
+            util.proc(pushHex, true);
+            Utilities.Progress = 90;
+            //return dir to the working dir
+            Directory.SetCurrentDirectory(originDir);
+
+            Utilities.Progress = 100;
+            Thread.Sleep(1000);
+            Utilities.Progress = 0;
+        }
+
         private void b_push_hex_Click(object sender, RoutedEventArgs e)
         {
-            
-                
-            string[] dirs = { };
-            var dialog = new CommonOpenFileDialog();
-            dialog.IsFolderPicker = true;
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                dirs = dialog.FileNames.ToArray();
-            }
-            Install install = new Install();
-
-            if (dirs.Length < 1)
-            {
-                util.dc.ConsoleInput = "Path wasn't specified, to complete APK install, give an exist path";
-                return;
-            }
-
-            //show all apks in the folder
-            string[] filePaths = Directory.GetFiles(dirs[0], "*.*",
-                                         SearchOption.AllDirectories);
-
-
-            string[] results = { };
-            var items = new installedItems(filePaths.ToList());
-            if ((bool)items.ShowDialog() == true)
-            {
-                results = System.IO.File.ReadAllLines(con.Get_ToInstall());
-
-            }
-            
             var uiContext = SynchronizationContext.Current;
+            
+            this.Dispatcher.Invoke((Action)delegate
+            {
 
+                Task.Run(() => Create_Hexagon()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+
+            });
+            
             
 
-            var  t = Task.Run(() => pushHex(results)).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-            if (Utilities.Progress == 100)
-                if (t.Status == TaskStatus.Faulted)
-                {
-                    foreach (var i in t.Exception.InnerExceptions)
-                    {
-                        Error.Text = i.Message;
-                        logItems.Add(Error);
-                    
-                    }
-                }
-            
 
         }
 

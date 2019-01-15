@@ -26,6 +26,7 @@ namespace Installer
             
         }
 
+        const string hexagonPyCreator = "elfsigner.py";
         const string toInstall = "ToInstall.txt";
         const string jsonFile = "Config.JSON";
         const string connected = "Connected";
@@ -41,6 +42,8 @@ namespace Installer
         const string bootloader = "bootloader";
 
         const string versionsScript = "iarversions.sh";
+        const string soc0Id = "/sys/devices/soc0/serial_number";
+        const string hexagonCreatorTool = "tools/elfsigner";
         const string voltage = "/sys/class/power_supply/battery/voltage_now";
         const string hexagonPath = "/system/lib/rfsa/adsp";
         const string calPath = "/sdcard/iar/";
@@ -53,6 +56,22 @@ namespace Installer
         string fastBootDevices = "fastboot devices";
 
 
+        public string Get_Elfsigner_Py()
+        {
+            return hexagonPyCreator;
+        }
+
+        public string Get_Elfsigner()
+        {
+            return hexagonCreatorTool;
+        }
+
+        public string Get_Soc0_Id()
+        {
+            return soc0Id;
+        }
+        
+        
         public string Get_ToInstall()
         {
             return toInstall;
@@ -126,7 +145,7 @@ namespace Installer
             return calPath;
         }
 
-        public string Hexagon()
+        public string Get_Hexagon()
         {
             return hexagonPath;
         }

@@ -1,0 +1,1 @@
+Logging to C:\projects\Installer\Installer\tools\elfsigner\output\ny\n\Elfsigner_log.txt

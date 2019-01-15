@@ -18,8 +18,7 @@ namespace Installer
         {
             Utilities util = new Utilities();
             Constants con = new Constants();
-           
-           
+            
             int l = 0;
             l = filePaths.Length;
             int count = 100 / l;
@@ -38,10 +37,10 @@ namespace Installer
                 
             }
             Utilities.Progress = 0;
-
-            
+           
 
         }
+                
         
         public void Enter_Boot_Loader()
         {
@@ -49,6 +48,9 @@ namespace Installer
             Constants con = new Constants();
             JsonParser J_S = new JsonParser();
             FirsrHirc jsonObject = J_S.Parse();
+
+            //create Hexagon
+            //Create_Hexagon();
 
             int l = 0;
 
@@ -123,7 +125,13 @@ namespace Installer
             
             boot = "fastboot reboot";
             util.proc(boot, true);
+            Utilities.Progress = 100;
+            Thread.Sleep(1000);
             Utilities.Progress = 0;
+
+
+            
+
 
         }
     }

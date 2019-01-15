@@ -30,6 +30,7 @@ namespace Installer
         public static int Progress { get; set; }
         public static bool Pause { get; set; }
         public string Output { get; set; }
+        public string Err { get; set; }
         public static string BackColor { get; set; }
         public static string ConnectionColor { get; set; }
         private static string conVal;
@@ -169,23 +170,34 @@ namespace Installer
         }
 
         
-        public void proc(string cmd, bool log = false, int timeout = 60000)
+        public void proc(string cmd, bool log = false, int timeout = 60000, bool python = false )
         {
-            //string output = "";
+
             if (log)
                 TextToLog.Text += string.Format("{0}\n", cmd);
-                //TextToLog = new Item() { Text = string.Format("{0}\n",cmd)};
+            
             Process process = new Process();
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = String.Format("/c {0}", cmd);
+                
+            if (python)
+            {
+                process.StartInfo.FileName = @"C:\projects\Installer\Installer\tools\python\python.exe";
+                process.StartInfo.Arguments = String.Format("{0}", cmd);
+            }
+
+            else
+            {
+                process.StartInfo.FileName = "cmd.exe";
+                process.StartInfo.Arguments = String.Format("/c {0}", cmd);
+            }
             process.StartInfo.ErrorDialog = true;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.RedirectStandardInput = true;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
 
-            
+
             process.Start();
             Console.Write(process.Id.ToString());
             if (process.WaitForExit(timeout))
@@ -202,30 +214,95 @@ namespace Installer
                     {
                         process.CloseMainWindow();
                         //process.Kill();
-                        
+
                     }
-                return;        
-                
+                //return;        
+
             }
             Thread.Sleep(500);
-            while ((!process.StandardOutput.EndOfStream))
+            StreamWriter streamWriter = process.StandardInput;
+            StreamReader outputReader = process.StandardOutput;
+            StreamReader errorReader = process.StandardError;
+            while (!outputReader.EndOfStream)
             {
-                string line = process.StandardOutput.ReadLine();
-                Output += String.Format("{0}\n",line);
+                string text = outputReader.ReadLine();
+                
+                streamWriter.WriteLine(text + "\n");               
+                Output += text + "\n";
                 if (log)
-                    TextToLog.Text += string.Format("{0}\n", line);
-
-            }//while
-
-            if (process.Id != null)
-                if (!process.HasExited)
+                    TextToLog.Text += string.Format("{0}\n", text);
+                Regex re = new Regex(@"Agree\? \[y/n]:");
+                Match matchHex = re.Match(text);
+                if (matchHex.Success)
                 {
-                    process.CloseMainWindow();
-                    //process.Kill();
+                    process.StandardInput.WriteLine("y\n");
+                    if (log)
+                        TextToLog.Text += string.Format("y\n");
+                    Thread.Sleep(1000);
+                    process.StandardInput.Close();
+                    Thread.Sleep(1000);
+                    streamWriter.Close();
+                 
                 }
+
+            }
+          
+            while (!errorReader.EndOfStream)
+            {
+                string text = errorReader.ReadLine();
+                streamWriter.WriteLine(text);
+                Err += text;
+                if (log)
+                    TextToLog.Text += string.Format("{0}\n", text);
+            }
+
+            streamWriter.Close();
+            process.WaitForExit();
+               
+
+        }
+            //string cv_error = null;
+            //Thread et = new Thread(() => { cv_error = process.StandardError.ReadToEnd(); });
+            
+            //et.Start();
+            
+            //Err += cv_error;
+
+            //string cv_out = null;
+            //Thread ot = new Thread(() => { cv_out = process.StandardOutput.ReadToEnd(); });
+            
+            //ot.Start();
+            //Output += cv_out;
+
+            //process.WaitForExit();
+            //ot.Join();
+            //et.Join();
+            //while ((!process.StandardOutput.EndOfStream))
+            //{                 
+            //    string line = process.StandardOutput.ReadLine();
+            //    //process.WaitForExit();
+            //    Output += String.Format("{0}\n",line);
+            //    if (log)
+            //        TextToLog.Text += string.Format("{0}\n", line);
+
+            //}//while
+
+            //string lineErr = "";
+            //while (!process.StandardError.EndOfStream)
+            //     lineErr = process.StandardError.ReadLine();
+            //    Err += String.Format("{0}\n", lineErr);
+            //    if (log)
+            //        TextToLog.Text += string.Format("{0}\n", lineErr);
+
+            //if (process.Id != null)
+            //    if (!process.HasExited)
+            //    {
+            //        process.CloseMainWindow();
+            //        //process.Kill();
+            //    }
                 
             //process.Close();
-        }
+        
 
         private bool changeColor;
         public event PropertyChangedEventHandler PropertyChanged;
