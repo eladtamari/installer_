@@ -3,37 +3,37 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Installer" Height="553" Width="891">
     <Grid Margin="0,0,2,0">
-        <Button x:Name="b_pull" Content="Pull Dependancies" HorizontalAlignment="Left" Margin="530,180,0,0" VerticalAlignment="Top" Width="112" RenderTransformOrigin="0.947,0.7" Click="b_pull_Click"/>
-        <Button x:Name="b_push_hex" Content="Push Hexagon" HorizontalAlignment="Left" Margin="239,180,0,0" VerticalAlignment="Top" Width="112" Click="b_push_hex_Click"/>
-        <Button x:Name="b_install" Content="Install Image" HorizontalAlignment="Left" Margin="134,180,0,0" VerticalAlignment="Top" Width="91" Click="b_install_Click"/>
-        <Button x:Name="b_push_calib" Content="Push Calibrations" HorizontalAlignment="Left" Margin="530,153,0,0" VerticalAlignment="Top" Width="112" Click="b_push_cal_Click"/>
+        <Button x:Name="b_pull" Content="Pull Dependancies" HorizontalAlignment="Left" Margin="742,130,0,0" VerticalAlignment="Top" Width="112" RenderTransformOrigin="0.947,0.7" Click="b_pull_Click"/>
+        <Button x:Name="b_push_hex" Content="Push Hexagon" HorizontalAlignment="Left" Margin="646,130,0,0" VerticalAlignment="Top" Width="91" Click="b_push_hex_Click"/>
+        <Button x:Name="b_install" Content="Install Image" HorizontalAlignment="Left" Margin="646,102,0,0" VerticalAlignment="Top" Width="91" Click="b_install_Click"/>
+        <Button x:Name="b_push_calib" Content="Push Calibrations" HorizontalAlignment="Left" Margin="743,102,0,0" VerticalAlignment="Top" Width="112" Click="b_push_cal_Click"/>
 
         <Grid HorizontalAlignment="Left" Height="38" Margin="10,226,0,0" VerticalAlignment="Top" Width="861">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="395*"/>
                 <ColumnDefinition Width="466*"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="b_install_apk" Content="Install APKs" HorizontalAlignment="Left" Margin="353,-46,0,0" VerticalAlignment="Top" Width="104" Click="b_install_apk_Click" Grid.ColumnSpan="2"/>
+            <Button x:Name="b_install_apk" Content="Install APKs" HorizontalAlignment="Left" Margin="241,-69,0,0" VerticalAlignment="Top" Width="91" Click="b_install_apk_Click" Grid.Column="1"/>
         </Grid>
-        <Grid HorizontalAlignment="Left" Height="221" Margin="10,2,0,0" VerticalAlignment="Top" Width="861">
+        <Grid HorizontalAlignment="Left" Height="221" Margin="7,10,0,0" VerticalAlignment="Top" Width="861">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <Label x:Name="l_version" Content="Cuerrent Release" HorizontalAlignment="Left" Margin="23,58,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.237,-0.077"/>
+            <Label x:Name="l_version" Content="Cuerrent Release" HorizontalAlignment="Left" Margin="23,80,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.237,-0.077"/>
             <Label x:Name="l_connected" Content="Device  Not Connected" HorizontalAlignment="Left" Margin="23,19,0,0" VerticalAlignment="Top" Background="#FFDC9D96"/>
-            <Label x:Name="l_Serial" Content="Serial Number" HorizontalAlignment="Left" Margin="23,84,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.237,0.308"/>
-            <Label x:Name="l_release_val" Content="None" HorizontalAlignment="Left" Margin="145,58,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.447,-0.115"/>
-            <Label x:Name="l_serial_val" Content="None" HorizontalAlignment="Left" Margin="146,83,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.026,0.462"/>
-            <Label x:Name="l_calib_file" Content="Calib files" HorizontalAlignment="Left" Margin="23,111,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.105,0.5"/>
-            <Label x:Name="l_calib_files_val" Content="None" HorizontalAlignment="Left" Margin="145,110,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="l_Serial" Content="Serial Number" HorizontalAlignment="Left" Margin="23,106,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.237,0.308"/>
+            <Label x:Name="l_release_val" Content="None" HorizontalAlignment="Left" Margin="145,80,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.447,-0.115"/>
+            <Label x:Name="l_serial_val" Content="None" HorizontalAlignment="Left" Margin="146,105,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.026,0.462"/>
+            <Label x:Name="l_calib_file" Content="Calib files" HorizontalAlignment="Left" Margin="23,133,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.105,0.5"/>
+            <Label x:Name="l_calib_files_val" Content="None" HorizontalAlignment="Left" Margin="145,132,0,0" VerticalAlignment="Top"/>
             <Label x:Name="l_battery" Content="NA" HorizontalAlignment="Left" Margin="724,10,0,0" VerticalAlignment="Top" Background="WhiteSmoke"/>
             <Label x:Name="l_voltage_header" Content="Voltage:" HorizontalAlignment="Left" Margin="663,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.737,0.192"/>
-            <Label x:Name="l_version_engine" Content="Current engine" HorizontalAlignment="Left" Margin="433,102,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.105,0.077"/>
-            <Label x:Name="l_engine_val" Content="None" HorizontalAlignment="Left" Margin="522,102,0,0" VerticalAlignment="Top"/>
-            <Label x:Name="l_config_files" Content="Config files" HorizontalAlignment="Left" Margin="23,137,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="l_version_engine" Content="Current engine" HorizontalAlignment="Left" Margin="23,190,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.105,0.077"/>
+            <Label x:Name="l_engine_val" Content="None" HorizontalAlignment="Left" Margin="145,190,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="l_config_files" Content="Config files" HorizontalAlignment="Left" Margin="23,159,0,0" VerticalAlignment="Top"/>
             <Image x:Name="logo" Source="INFINITY_logo.jpg" Grid.Column="0" Margin="0,452,9,-265" Height="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Right" Width="176" Grid.RowSpan="1" />
-            <Label x:Name="l_config_files_val" Content="None" HorizontalAlignment="Left" Margin="145,135,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="l_config_files_val" Content="None" HorizontalAlignment="Left" Margin="145,157,0,0" VerticalAlignment="Top"/>
             <CheckBox x:Name="cb_enable_debug" Content="Enable debug" HorizontalAlignment="Left" Margin="298,26,0,0" VerticalAlignment="Top" Click="cb_enable_debug_Checked" IsChecked="False"/>
 
         </Grid>
@@ -53,7 +53,7 @@
             </ScrollViewer>
         </Grid>
         <Grid HorizontalAlignment="Left" Height="27" Margin="21,288,0,0" VerticalAlignment="Top" Width="850"/>
-        <Button x:Name="b_refresh" Content="Refresh" HorizontalAlignment="Left" Margin="211,25,0,0" VerticalAlignment="Top" Width="75" Click="b_refresh_Click"/>
+        <Button x:Name="b_refresh" Content="Refresh" HorizontalAlignment="Left" Margin="192,32,0,0" VerticalAlignment="Top" Width="75" Click="b_refresh_Click"/>
 
 
     </Grid>

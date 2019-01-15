@@ -26,9 +26,10 @@ namespace Installer
             foreach (var apk in filePaths)
             {
                                
-                string cmd = string.Format("adb install {0}", apk);
+                string cmd = string.Format("adb install \"{0}\"", apk);
                 util.proc(cmd, true);                
                 Regex rx = new Regex(@"Success");
+                Thread.Sleep(1000);
                 Match match = rx.Match(util.Output);
                 if (!match.Success)
                     Console.WriteLine("APK alreasy Exist");
