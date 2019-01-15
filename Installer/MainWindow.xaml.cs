@@ -46,6 +46,9 @@ namespace Installer
             };
             log.ItemsSource = logItems;
 
+
+            Utilities.EnableDebug = false;
+
             string iconsPath;
             //set the infinity icon
             iconsPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "INFINITY_logo.jpg");
@@ -92,12 +95,13 @@ namespace Installer
 
         }
 
-      
 
+
+        #region Install Images
         private void b_install_Click(object sender, RoutedEventArgs e)
         {
             string[] dir = { };
-            string[] results = {};
+            string[] results = { };
             var dialog = new CommonOpenFileDialog();
             dialog.IsFolderPicker = true;
 
@@ -107,7 +111,7 @@ namespace Installer
                 dir = dialog.FileNames.ToArray();
             }
             Install install = new Install();
-            
+
             if (dir.Length < 1)
             {
                 util.dc.ConsoleInput = "no files found";
@@ -115,31 +119,31 @@ namespace Installer
                 return;
             }
 
-            
+
             string[] files = Directory.GetFiles(dir[0], "*.img",
                                          SearchOption.TopDirectoryOnly);
 
             List<string> files_ = new List<string>();
             List<string> inGame = new List<string>();
-            
+
             JsonParser J_S = new JsonParser();
             FirsrHirc jsonObject = J_S.Parse();
             var t = jsonObject.install.list;
-            
+
             foreach (var im in t)
                 inGame.Add(im.image);
-            
-           foreach (var file in files)
-           {
-               string g = System.IO.Path.GetFileName(file);
-               if (inGame.Contains(g))
-                   files_.Add(file);
-             
-           }
-            
+
+            foreach (var file in files)
+            {
+                string g = System.IO.Path.GetFileName(file);
+                if (inGame.Contains(g))
+                    files_.Add(file);
+
+            }
+
 
             //show all apks in the folder
-            
+
             var items = new installedItems(files_.ToList());
             if (!(bool)items.ShowDialog() == true)
             {
@@ -155,21 +159,23 @@ namespace Installer
                 Task.Run(() => install.Enter_Boot_Loader()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
 
             });
-            
+
             //var run = Task.Run(() => install.Enter_Boot_Loader()).ContinueWith(failedTask => Console.WriteLine("Device is not responding"),
             //                 TaskContinuationOptions.OnlyOnFaulted); 
-            
+
         }
 
         private void b_pull_Click(object sender, RoutedEventArgs e)
         {
             var uiContext = SynchronizationContext.Current;
             var t = Task.Run(() => pull()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-                     
+
         }
 
+        #endregion
 
 
+        #region Create Hexagon
         public void Create_Hexagon()
         {
             Utilities util = new Utilities();
@@ -230,7 +236,7 @@ namespace Installer
             Utilities.Progress = 66;
 
             var myFiles = Directory.GetFiles(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "output"), "*.so", SearchOption.TopDirectoryOnly);
-                
+
             //push the hexagon file to the glasses
             string pushHex = string.Format("adb push {0} /system/lib/rfsa/adsp", myFiles[0]);
             util.proc(pushHex, true);
@@ -241,7 +247,8 @@ namespace Installer
             Utilities.Progress = 100;
             Thread.Sleep(1000);
             Utilities.Progress = 0;
-        }
+        } 
+        #endregion
 
         private void b_push_hex_Click(object sender, RoutedEventArgs e)
         {
@@ -259,6 +266,7 @@ namespace Installer
 
         }
 
+        #region push calibration files
         private void b_push_cal_Click(object sender, RoutedEventArgs e)
         {
 
@@ -308,19 +316,14 @@ namespace Installer
                 }
 
 
-        }
+        } 
+        #endregion
 
         
         private void b_enable_disable_debug_Click(object sender, RoutedEventArgs e)
         {
-            var uiContext = SynchronizationContext.Current;
-            this.Dispatcher.Invoke((Action)delegate
-            {
-
-                Task.Run(() => pullEditPush()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-
-            });
-            //var t = Task.Run(() => pullEditPush());
+            
+           
         }
 
         private void pull()
@@ -389,6 +392,12 @@ namespace Installer
             try
             {
                 util.Check_devices();
+                string root = "adb root";
+                util.proc(root, true);
+
+                Thread.Sleep(1000);
+                string remount = "adb remount";
+                util.proc(remount, true);
                 pushPull.pullEditPush(util);
             }
             catch (Exception ex)
@@ -481,6 +490,7 @@ namespace Installer
             }
         }
 
+        #region worker update the gui's values
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
 
@@ -495,10 +505,10 @@ namespace Installer
                     Progress_bar.Value = Utilities.Progress;
 
                 });
-                
+
                 this.Dispatcher.Invoke(() =>
                 {
-                   l_connected.Content = Utilities.ConnectionVal;
+                    l_connected.Content = Utilities.ConnectionVal;
 
                 });
 
@@ -510,11 +520,11 @@ namespace Installer
 
                 if (!Utilities.Pause)
                 {
-                   // this.Dispatcher.Invoke(() =>
-                   //{
-                   //    l_serial_val.Content = Utilities.SerialNum;
+                    // this.Dispatcher.Invoke(() =>
+                    //{
+                    //    l_serial_val.Content = Utilities.SerialNum;
 
-                   //});
+                    //});
 
                     this.Dispatcher.Invoke(() =>
                     {
@@ -542,7 +552,7 @@ namespace Installer
                     //});
 
                 }
-                else 
+                else
                 {
                     this.Dispatcher.Invoke(() =>
                    {
@@ -567,11 +577,13 @@ namespace Installer
 
 
 
-        }
+        } 
+        #endregion
 
+        #region install APK
         private void b_install_apk_Click(object sender, RoutedEventArgs e)
         {
-            
+
             string[] dirs = { };
             var dialog = new CommonOpenFileDialog();
             dialog.IsFolderPicker = true;
@@ -592,15 +604,15 @@ namespace Installer
                                          SearchOption.TopDirectoryOnly);
 
 
-            string[] results = {};
+            string[] results = { };
             var items = new installedItems(filePaths.ToList());
             if ((bool)items.ShowDialog() == true)
             {
                 results = System.IO.File.ReadAllLines(con.Get_ToInstall());
-                
+
             }
-            
-            
+
+
             //wait till the list of items to be installed return
 
 
@@ -613,7 +625,7 @@ namespace Installer
                     Task.Run(() => install.Install_APKs(results)).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
 
                 });
-            
+
 
                 //var run = Task.Run(() => install.Install_APKs(results)).ContinueWith(failedTask => Console.WriteLine("APK is already installed"),
                 //               TaskContinuationOptions.OnlyOnFaulted);
@@ -623,32 +635,72 @@ namespace Installer
                 util.dc.ConsoleInput = "No APK to install, pick an apk to install";
                 util.dc.RunCommand();
             }
-            
-            
-        }
 
+
+        }
+        
+        #endregion
+
+        #region Refresh button
         private void b_refresh_Click(object sender, RoutedEventArgs e)
         {
+            Utilities util = new Utilities();
+            Utilities util1 = new Utilities();
+            Utilities util2 = new Utilities();
+            Utilities util3 = new Utilities();
             var uiContext = SynchronizationContext.Current;
 
             this.Dispatcher.Invoke((Action)delegate
             {
-
+                
                 Task.Run(() => Check_Release_and_Engine()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-                Task.Run(() => util.Check_devices()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-                Thread.Sleep(2000);
-                l_serial_val.Content = Utilities.SerialNum;
+                
+                Task.Run(() => util1.Check_devices()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+               
+                Task.Run(() => util2.Check_Calib_Files()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+              
+                Task.Run(() => util3.Check_Config_Files_Etc()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+               
 
             });
 
-            
+            Thread.Sleep(4000);
+            l_calib_files_val.Content = String.Join(", ", Utilities.CalibrationFiles.ToArray());
+            l_config_files_val.Content = string.Join(", ", Utilities.ConfigFiles.ToArray());
+            l_serial_val.Content = Utilities.SerialNum;
+            l_release_val.Content = Utilities.Release;
+            l_engine_val.Content = Utilities.Engine;
+
+
+        } 
+        #endregion
+
+        private void cb_enable_debug_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!Convert.ToBoolean(cb_enable_debug.IsChecked))           
+                Utilities.EnableDebug = false;
+           
+            else
+                Utilities.EnableDebug = true;
+
+            var uiContext = SynchronizationContext.Current;
+            this.Dispatcher.Invoke((Action)delegate
+            {
+               
+                Task.Run(() => pullEditPush()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+
+            });
+               
         }
+
+       
            
 
        
     }
 
 
+//class for logging object to add to logItems collection
 public class Item
 {
     public string Text { get; set; }

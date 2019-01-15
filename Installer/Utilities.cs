@@ -20,11 +20,16 @@ namespace Installer
             dc = new ConsoleContent();
             ConnectionColor = Constants.Fastboot_Color;
             BackColor = Constants.Fail_Color;
+            
 
             TextToLog = new Item();
+
+            CalibrationFiles = new List<string>();
+            ConfigFiles = new List<string>();
             
         }
 
+        public static bool EnableDebug { get; set; }
         public static Item TextToLog { get; set; }
         Constants con = new Constants();
         public static int Progress { get; set; }
@@ -83,10 +88,58 @@ namespace Installer
             }
         }
 
-
+        public static List<string> ConfigFiles { get; set; }
+        public static  List<string> CalibrationFiles { get; set; }
         public ConsoleContent dc { get; set; }
-       
 
+        public void Check_Config_Files_Etc()
+        {            
+            string d = ConfigFiles.ToString();
+            proc(string.Format("adb shell ls {0}", con.Get_Etc_Iar_Path()));
+            Thread.Sleep(500);
+            Regex rx = new Regex("config.ini");
+            Match matchCon = rx.Match(Output);
+            if (matchCon.Success)
+            {
+                if (!d.Contains(matchCon.Value))
+                    ConfigFiles.Add(string.Format(@"\etc\iar\{0}", matchCon.Value));
+            }
+        }
+        public void Check_Calib_Files()
+        {
+            string c = CalibrationFiles.ToString();
+            string d = ConfigFiles.ToString();
+            proc(string.Format("adb shell ls {0}", con.Calib()));
+            Thread.Sleep(500);
+            Regex rx = new Regex("config.ini");
+            Match matchCon = rx.Match(Output);
+                if (matchCon.Success)
+                {
+                    if (!d.Contains(matchCon.Value))
+                        ConfigFiles.Add(matchCon.Value);
+                }
+
+            Regex rxDebug = new Regex("debugConfig.ini");
+            Match matchConDebug = rxDebug.Match(Output);
+            if (matchConDebug.Success)
+            {
+                if (!d.Contains(matchConDebug.Value))
+                ConfigFiles.Add(matchConDebug.Value);
+            }
+            foreach (string cal in con.Get_Cal_Files())
+            {
+
+                Regex rx_ = new Regex(cal);
+                Match match = rx_.Match(Output);
+                if (match.Success)
+                {  
+                    if (!c.Contains(match.Value))
+                        CalibrationFiles.Add(match.Value);
+                }
+                
+            }
+
+        }
         //Check if device connected
         public string Find_File(string hint)
         {

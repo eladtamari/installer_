@@ -174,7 +174,6 @@ namespace Installer
             Thread.Sleep(500);
             Utilities.Progress = 0;
 
-
         }
 
         
@@ -208,7 +207,13 @@ namespace Installer
                     Console.WriteLine(groups[0]);                    
                     Console.ReadLine();
                     flag = true;
-                    f[i] = "disableAllLogs = false";
+                    
+                    
+                    if (Utilities.EnableDebug)
+                        f[i] = "disableAllLogs = false";
+                    else
+                        f[i] = "disableAllLogs = true";
+
                     string d = string.Join("\n", f);
                     try
                     {
