@@ -202,7 +202,7 @@ namespace Installer
             Utilities.Progress = 25;
             util.Output = "";
             //string y = Directory.GetCurrentDirectory();
-            string v = string.Format("..\\python\\python.exe {0} -t 0x{1} \ny\n", con.Get_Elfsigner_Py(), hexValue);
+            string v = string.Format("..\\python\\python.exe {0} -t 0x{1} -o output\\{2}\n", con.Get_Elfsigner_Py(), hexValue, Utilities.SerialNum);
             try
             {
                 util.proc(v, true, 3000, false);
@@ -218,7 +218,7 @@ namespace Installer
             bool t = false;
             while (!t && cnt < 20)
             {
-                t = Directory.EnumerateFiles(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "output"), "test*.so").Any() ? true : false;
+                t = Directory.EnumerateFiles(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "output", Utilities.SerialNum.Trim()), "test*.so").Any() ? true : false;
                 cnt++;
                 Thread.Sleep(1000);
             }
@@ -235,7 +235,7 @@ namespace Installer
             util.proc(remount, true);
             Utilities.Progress = 66;
 
-            var myFiles = Directory.GetFiles(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "output"), "*.so", SearchOption.TopDirectoryOnly);
+            var myFiles = Directory.GetFiles(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "output", Utilities.SerialNum.Trim()), "*.so", SearchOption.TopDirectoryOnly);
 
             //push the hexagon file to the glasses
             string pushHex = string.Format("adb push {0} /system/lib/rfsa/adsp", myFiles[0]);
