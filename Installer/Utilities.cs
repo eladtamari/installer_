@@ -29,6 +29,9 @@ namespace Installer
             
         }
 
+       
+        public static bool Connect { get; set; }
+              
         public static bool EnableDebug { get; set; }
         public static Item TextToLog { get; set; }
         Constants con = new Constants();
@@ -50,9 +53,15 @@ namespace Installer
                 if (value == "Fastboot")
                     ConnectionColor = Constants.Fastboot_Color;
                 else if (value == "Connected")
+                {
+                    Connect = true;
                     ConnectionColor = Constants.Pass_Color;
+                }
                 else
+                {
+                    Connect = false;
                     ConnectionColor = Constants.Fail_Color;
+                }
                
             }
         }
@@ -364,6 +373,31 @@ namespace Installer
             //    }
                 
             //process.Close();
+
+        public void Adb_Connect_Disconnect()
+        {
+
+            if (Connect)
+            {
+                proc(string.Format("adb connect {0}:{1}", con.Get_Adb_Addr_Port()[0], con.Get_Adb_Addr_Port()[1]), true);
+                Thread.Sleep(5000);
+                Regex rx = new Regex(string.Format("connected to {0}:{1}", con.Get_Adb_Addr_Port()[0], con.Get_Adb_Addr_Port()[1]));
+                if (string.IsNullOrEmpty(Output))
+                    throw new IOException("output is empty");
+                Match matchCon = rx.Match(Output);
+                if (!matchCon.Success)
+                {
+                    throw new IOException("Cannot connect to device");
+                }
+               
+            }
+            else
+            {
+                proc(string.Format("adb disconnect"));
+                Thread.Sleep(5000);
+            }
+
+        }
         
 
         private bool changeColor;

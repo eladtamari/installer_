@@ -644,6 +644,9 @@ namespace Installer
         #region Refresh button
         private void b_refresh_Click(object sender, RoutedEventArgs e)
         {
+            if (!l_connected.Content.Equals("Connected"))
+                return;
+
             Utilities util = new Utilities();
             Utilities util1 = new Utilities();
             Utilities util2 = new Utilities();
@@ -691,6 +694,29 @@ namespace Installer
 
             });
                
+        }
+
+        private void b_connect_Click(object sender, RoutedEventArgs e)
+        {
+            var uiContext = SynchronizationContext.Current;
+            Utilities util = new Utilities();
+            if (b_connect.Content.ToString().Equals("Connect"))
+            {
+                Utilities.Connect = true;
+                b_connect.Content = "Disconnect";
+            }
+            else if (b_connect.Content.ToString().Equals("Disconnect"))
+            {
+                Utilities.Connect = false;
+                b_connect.Content = "Connect";
+            }
+
+            this.Dispatcher.Invoke((Action)delegate
+            {
+                
+                Task.Run(() => util.Adb_Connect_Disconnect()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+
+            });
         }
 
        

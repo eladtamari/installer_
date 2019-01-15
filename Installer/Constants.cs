@@ -26,6 +26,9 @@ namespace Installer
             
         }
 
+        const string adbIpAddress = "192.168.137.1";
+        const string adbPort = "5556";
+
         const string hexagonPyCreator = "elfsigner.py";
         const string toInstall = "ToInstall.txt";
         const string jsonFile = "Config.JSON";
@@ -55,6 +58,11 @@ namespace Installer
        
         string fastBootDevices = "fastboot devices";
 
+        public string[] Get_Adb_Addr_Port()
+        {
+            string[] ipAddressAndPort = { adbIpAddress, adbPort };
+            return ipAddressAndPort;
+        }
 
         public string Get_Elfsigner_Py()
         {
