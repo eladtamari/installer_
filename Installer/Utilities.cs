@@ -226,17 +226,18 @@ namespace Installer
                 Regex rx1 = new Regex(@"fastboot.*");
                 Match match1 = rx.Match(Output);
                 if (!match1.Success)
-                    throw new NullReferenceException();
+                    TextToLog.Text += "cant find fastboot in adb, this cant cause when the device is starting up\n";
                 else
                 {
                     ConnectionVal = "Fastboot";
-                    SerialNum = Output.Split('\t')[0]; 
+                    SerialNum = Output.Split('\t')[0];
                     Output = "";
                     return;
                 }
             }
             ConnectionVal = con.Connected();
-            SerialNum = match.Value.Split('\n')[1];        
+            if (!string.IsNullOrEmpty(match.Value))
+                SerialNum = match.Value.Split('\n')[1];        
             Output = "";                    
         }
 

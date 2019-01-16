@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -13,12 +14,32 @@ namespace Installer
     class Install
     {
 
+        public static List<string> apkFilePaths { get; set; }
+        public static List<string> imgFilePaths { get; set; }
+        public static List<string> calFilePaths { get; set; }
+        public static List<string> iniFilePaths { get; set; }
+        public static List<string> hexFilePaths { get; set; }
+
+        public Install()
+        {
+            apkFilePaths  = new List<string>();
+            imgFilePaths  = new List<string>();
+            calFilePaths  = new List<string>();
+            iniFilePaths  = new List<string>();
+            hexFilePaths  = new List<string>();
+        }
+
 
         public void Install_APKs(string[] filePaths)
         {
             Utilities util = new Utilities();
             Constants con = new Constants();
+
+
+            if (filePaths.Length < 1)
+                return;
             
+
             int l = 0;
             l = filePaths.Length;
             int count = 100 / l;
@@ -43,13 +64,14 @@ namespace Installer
         }
                 
         
-        public void Enter_Boot_Loader()
+        public void Enter_Boot_Loader(string[] images)
         {
             Utilities util = new Utilities();
             Constants con = new Constants();
             JsonParser J_S = new JsonParser();
             FirsrHirc jsonObject = J_S.Parse();
 
+            
             //create Hexagon
             //Create_Hexagon();
 
@@ -85,11 +107,20 @@ namespace Installer
                 
             }
 
-            var results = System.IO.File.ReadAllLines(con.Get_ToInstall());
-            if (results.Length < 1)
+
+            //check id there are images as input if not take it from the file
+             string[] results;
+            if (images.Length < 1)
             {
-                return;
-            }   
+                results = System.IO.File.ReadAllLines(con.Get_ToInstall());
+                if (results.Length < 1)
+                {
+                    return;
+                }
+            }
+            else
+                results = images;
+
 
             Utilities.Pause = true;
             l = jsonObject.install.list.Count;
@@ -126,14 +157,101 @@ namespace Installer
             
             boot = "fastboot reboot";
             util.proc(boot, true);
+            
+           
+            int cnt = 0;
+            while (!Utilities.ConnectionVal.Equals("Connected") && cnt < 30)
+            {           
+                
+                Thread.Sleep(10000);
+                util.Check_devices();
+                cnt++;
+                Console.WriteLine(string.Format("try number {0} check if connected\n", cnt.ToString()));
+            }
+            
+            Thread.Sleep(60000);
+
             Utilities.Progress = 100;
             Thread.Sleep(1000);
             Utilities.Progress = 0;
 
+        }
+  
 
+        public void One_shot_Install()
+        {
+        //form to summerize the preinstall
+            //in the form img, apk, cal, hexagon, config
+ 
+            //install img
+            //install apks
+            //copy cal to /sdcard/iar
+            //copy hexagon to "/system/lib/rfsa/adsp"
+
+            //Dialog
+            string[] dirs = { };
+            var dialog = new CommonOpenFileDialog();
+            dialog.IsFolderPicker = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                dirs = dialog.FileNames.ToArray();
+            }
             
 
+            if (dirs.Length < 1)
+            {
+               
+                return;
+            }
 
+            //show all apks in the folder
+             apkFilePaths = Directory.GetFiles(dirs[0], "*.apk",
+                                         SearchOption.AllDirectories).ToList();
+
+             imgFilePaths = Directory.GetFiles(dirs[0], "*.img",
+                                         SearchOption.AllDirectories).ToList();
+
+             hexFilePaths = Directory.GetFiles(dirs[0], "*.so",
+                                         SearchOption.AllDirectories).ToList();
+            
+             iniFilePaths = Directory.GetFiles(dirs[0], "*.ini",
+                                         SearchOption.AllDirectories).ToList();
+
+             calFilePaths = Directory.GetFiles(dirs[0], "*.cal",
+                                         SearchOption.AllDirectories).ToList();
+
+
+
+            //filter out the images not for burn
+
+             List<string> files_ = new List<string>();
+             List<string> inGame = new List<string>();
+
+             JsonParser J_S = new JsonParser();
+             FirsrHirc jsonObject = J_S.Parse();
+             var t = jsonObject.install.list;
+
+             foreach (var im in t)
+                 inGame.Add(im.image);
+
+             foreach (var file in imgFilePaths)
+             {
+                 string g = System.IO.Path.GetFileName(file);
+                 if (inGame.Contains(g))
+                     files_.Add(file);
+
+             }
+
+             imgFilePaths = files_;
+
+
+            //string[] results = { };
+            //var items = new installedItems(filePaths.ToList());
+            //if ((bool)items.ShowDialog() == true)
+            //{
+            //    results = System.IO.File.ReadAllLines(con.Get_ToInstall());
+
+            //}
         }
     }
 }

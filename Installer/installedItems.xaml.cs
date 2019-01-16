@@ -113,12 +113,6 @@ namespace Installer
             lstExclude.Items.Refresh();
 
 
-
-            
-            
-
-
-
         }
        
     }

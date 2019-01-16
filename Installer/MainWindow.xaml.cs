@@ -100,6 +100,7 @@ namespace Installer
         #region Install Images
         private void b_install_Click(object sender, RoutedEventArgs e)
         {
+            string[] empty = {};
             string[] dir = { };
             string[] results = { };
             var dialog = new CommonOpenFileDialog();
@@ -114,8 +115,7 @@ namespace Installer
 
             if (dir.Length < 1)
             {
-                util.dc.ConsoleInput = "no files found";
-                util.dc.RunCommand();
+               
                 return;
             }
 
@@ -156,7 +156,7 @@ namespace Installer
             this.Dispatcher.Invoke((Action)delegate
             {
 
-                Task.Run(() => install.Enter_Boot_Loader()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+                Task.Run(() => install.Enter_Boot_Loader(empty)).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
 
             });
 
@@ -632,8 +632,7 @@ namespace Installer
             }
             else
             {
-                util.dc.ConsoleInput = "No APK to install, pick an apk to install";
-                util.dc.RunCommand();
+               
             }
 
 
@@ -719,7 +718,120 @@ namespace Installer
             });
         }
 
-       
+        private void One_Shot_Install_Click(object sender, RoutedEventArgs e)
+        {
+
+            PushPullFiles pushPull = new PushPullFiles();
+            var uiContext = SynchronizationContext.Current;
+            
+            List<string> apkFilePathsFiltered = new List<string>();
+            List<string> imgFilePathsFiltered = new List<string>();
+            List<string> calFilePathsFiltered = new List<string>();
+            List<string> hexFilePathsFiltered = new List<string>();
+            List<string> iniFilePathsFiltered = new List<string>();
+                             
+
+            Install install = new Install();
+            install.One_shot_Install();
+            
+
+            var items = new installedItemsOneShot();
+            items.ShowDialog();
+            var files = File.ReadAllLines(con.Get_ToInstall());
+            foreach (var item in files)
+            {
+                Console.WriteLine(System.IO.Path.GetExtension(item));
+                if (System.IO.Path.GetExtension(item).Equals(".img"))
+                    imgFilePathsFiltered.Add(item);
+
+                if (System.IO.Path.GetExtension(item).Equals(".apk"))
+                {
+                    
+                    apkFilePathsFiltered.Add(item);
+                }
+                if (System.IO.Path.GetExtension(item).Equals(".cal"))
+                    calFilePathsFiltered.Add(item);
+                if (System.IO.Path.GetExtension(item).Equals(".so"))
+                    hexFilePathsFiltered.Add(item);
+                if (System.IO.Path.GetExtension(item).Equals(".ini"))
+                    iniFilePathsFiltered.Add(item);
+            }
+
+            //install images
+            Utilities.Progress = 10;
+            //if (imgFilePathsFiltered.Count > 0)
+            //{
+            //    var t2 = new Task(() => install.Install_APKs(imgFilePathsFiltered.ToArray()));
+            //    var t1 = Task.Run(() => install.Enter_Boot_Loader(imgFilePathsFiltered.ToArray()));
+            //    Utilities.Progress += 10 ;
+            //    await t1.ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+            //    //await t1.ContinueWith(t2.Start());
+            
+            //}
+            this.Dispatcher.Invoke((Action)delegate
+            {
+                string pushHex= "";
+                if (hexFilePathsFiltered.Count > 0)
+                     pushHex = string.Format("adb push {0} /system/lib/rfsa/adsp", hexFilePathsFiltered[0]);
+                //install images
+                Utilities.Progress = 10;
+                var backgroundScheduler = TaskScheduler.Default;
+                var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();  
+                //install img
+                Task.Factory.StartNew(delegate { install.Enter_Boot_Loader(imgFilePathsFiltered.ToArray()); },
+                         backgroundScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+                //install apk
+                ContinueWith(delegate { install.Install_APKs(apkFilePathsFiltered.ToArray()); },
+                             backgroundScheduler).
+
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+
+
+                //copy Calibrations files
+                ContinueWith(delegate { pushPull.PushCalib(calFilePathsFiltered.ToArray(), true); },
+                             backgroundScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+                ContinueWith(delegate { util.proc("adb root", true); },
+                             backgroundScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+                ContinueWith(delegate { util.proc("adb remount", true); },
+                             backgroundScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+                //wait after remount
+                ContinueWith(delegate { Thread.Sleep(5000); },
+                             backgroundScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+                //copy hexagon
+                ContinueWith(delegate { util.proc(pushHex, true); },
+                             backgroundScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler);
+                
+                
+                
+         
+
+                Utilities.Progress = 0;
+
+
+               
+
+            });
+
+            
+            //install apk
+            
+            
+                    
+
+        }                                          
+                                                   
            
 
        

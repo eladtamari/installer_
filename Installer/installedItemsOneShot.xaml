@@ -1,0 +1,68 @@
+﻿<Window x:Class="Installer.installedItemsOneShot"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Candidates" Height="770.082" Width="643.14">
+    <Grid Margin="0,0,2,0">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Label x:Name="l_apk" Content="APK files" HorizontalAlignment="Left" Margin="10,15,0,0" VerticalAlignment="Top"/>
+        <ListBox HorizontalAlignment="Left" Height="151" Margin="10,41,0,0" VerticalAlignment="Top" Width="590"
+            x:Name="apk_files_selector" SelectionMode="Multiple">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox  Content="{Binding Text}" 
+          IsChecked="{Binding Checked ,Mode=TwoWay}" Click="CheckBoxApk_Click"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ListBox HorizontalAlignment="Left" Height="117" Margin="10,233,0,0" VerticalAlignment="Top" Width="590"
+            x:Name="img_files_selector" SelectionMode="Multiple">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox  Content="{Binding Text}" 
+          IsChecked="{Binding Checked ,Mode=TwoWay}" Click="CheckBoxImg_Click"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <CheckBox x:Name="cb_all_apk" Content="All" HorizontalAlignment="Left" Margin="101,21,0,0" VerticalAlignment="Top" IsChecked="True" Click="cb_all_apk_Change"/>
+        <ListBox HorizontalAlignment="Left" Height="66" Margin="10,381,0,0" VerticalAlignment="Top" Width="590"
+        	x:Name="ini_files_selector" SelectionMode="Multiple">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox  Content="{Binding Text}" 
+        				IsChecked="{Binding Checked, Mode=TwoWay}" Click="CheckBoxIni_Click"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <ListBox HorizontalAlignment="Left" Height="86" Margin="10,484,0,0" VerticalAlignment="Top" Width="590"
+        	x:Name="cal_files_selector" SelectionMode="Multiple">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox  Content="{Binding Text}" 
+        				IsChecked="{Binding Checked, Mode=TwoWay}" Click="CheckBoxCal_Click"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button x:Name="b_install" Content="Install" HorizontalAlignment="Left" Margin="283,687,0,0" VerticalAlignment="Top" Width="93" Click="b_Install_Click" IsDefault="True" Height="36"/>
+        <Label x:Name="l_cal" Content="Calibration files" HorizontalAlignment="Left" Margin="11,457,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="cb_all_cal" Content="All" HorizontalAlignment="Left" Margin="108,463,0,0" VerticalAlignment="Top" IsChecked="True" Click="cb_all_cal_Change"/>
+        <Label x:Name="l_ini" Content="ini files" HorizontalAlignment="Left" Margin="11,353,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="cb_all_ini" Content="All" HorizontalAlignment="Left" Margin="105,360,0,0" VerticalAlignment="Top" Click="cb_all_ini_Change"/>
+        <Label x:Name="l_img" Content="Images files" HorizontalAlignment="Left" Margin="11,197,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="cb_all_image" Content="All" HorizontalAlignment="Left" Margin="103,204,0,0" VerticalAlignment="Top" IsChecked="True" Click="cb_all_img_Change"/>
+        <ListBox HorizontalAlignment="Left" Height="68" Margin="10,595,0,0" VerticalAlignment="Top" Width="590"
+        	x:Name="hex_files_selector" SelectionMode="Multiple">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox  Content="{Binding Text}" 
+        				IsChecked="{Binding Checked, Mode=TwoWay}" Click="CheckBoxHex_Click"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Label x:Name="l_hex" Content="Hexagon files" HorizontalAlignment="Left" Margin="11,573,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="cb_all_hex" Content="All" HorizontalAlignment="Left" Margin="106,580,0,0" VerticalAlignment="Top" IsChecked="True" Click="cb_all_hex_Change"/>
+    </Grid>
+
+</Window>

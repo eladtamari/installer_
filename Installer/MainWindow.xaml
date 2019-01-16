@@ -15,7 +15,7 @@
             </Grid.ColumnDefinitions>
             <Button x:Name="b_install_apk" Content="Install APKs" HorizontalAlignment="Left" Margin="241,-69,0,0" VerticalAlignment="Top" Width="91" Click="b_install_apk_Click" Grid.Column="1"/>
         </Grid>
-        <Grid HorizontalAlignment="Left" Height="221" Margin="7,10,0,0" VerticalAlignment="Top" Width="861">
+        <Grid x:Name="control" HorizontalAlignment="Left" Height="221" Margin="7,10,0,0" VerticalAlignment="Top" Width="861">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
@@ -36,6 +36,7 @@
             <Label x:Name="l_config_files_val" Content="None" HorizontalAlignment="Left" Margin="145,157,0,0" VerticalAlignment="Top"/>
             <CheckBox x:Name="cb_enable_debug" Content="Enable debug" HorizontalAlignment="Left" Margin="641,54,0,0" VerticalAlignment="Top" Click="cb_enable_debug_Checked" IsChecked="False"/>
             <Button x:Name="b_connect" Content="Connect" HorizontalAlignment="Left" Margin="357,26,0,0" VerticalAlignment="Top" Width="75" Click="b_connect_Click"/>
+            <Button x:Name="b_one_shot_install" Content="One shot Install" HorizontalAlignment="Left" Margin="736,147,0,0" VerticalAlignment="Top" Width="112" Click="One_Shot_Install_Click"/>
 
         </Grid>
         <ProgressBar x:Name="Progress_bar" HorizontalAlignment="Left" Height="14" Margin="34,233,0,0" VerticalAlignment="Top" Width="811"/>
