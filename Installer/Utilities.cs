@@ -231,7 +231,11 @@ namespace Installer
                 Regex rx1 = new Regex(@"fastboot.*");
                 Match match1 = rx.Match(Output);
                 if (!match1.Success)
-                    TextToLog.Text += "cant find fastboot in adb, this cant cause when the device is starting up\n";
+                {
+                    TextToLog.Text += "cant find devices, and device isn't in fastboot either\n";
+                    ConnectionVal = con.Disconnected();
+                    return;
+                }
                 else
                 {
                     ConnectionVal = "Fastboot";
