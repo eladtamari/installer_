@@ -114,6 +114,7 @@ namespace Installer
                     ConfigFiles.Add(string.Format(@"\etc\iar\{0}", matchCon.Value));
             }
         }
+
         public void Check_Calib_Files()
         {
             string c = CalibrationFiles.ToString();
@@ -121,12 +122,16 @@ namespace Installer
             proc(string.Format("adb shell ls {0}", con.Calib()));
             Thread.Sleep(500);
             Regex rx = new Regex("config.ini");
+            if (string.IsNullOrEmpty(Output))
+                return;
+             
             Match matchCon = rx.Match(Output);
                 if (matchCon.Success)
                 {
                     if (!d.Contains(matchCon.Value))
                         ConfigFiles.Add(matchCon.Value);
                 }
+
 
             Regex rxDebug = new Regex("debugConfig.ini");
             Match matchConDebug = rxDebug.Match(Output);
