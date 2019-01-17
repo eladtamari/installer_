@@ -55,8 +55,7 @@ namespace Installer
                 if (!match.Success)
                     Console.WriteLine("APK alreasy Exist");
                 Utilities.Progress = l + count;
-                
-                
+                 
             }
             Utilities.Progress = 0;
            
@@ -70,11 +69,7 @@ namespace Installer
             Constants con = new Constants();
             JsonParser J_S = new JsonParser();
             FirsrHirc jsonObject = J_S.Parse();
-
-            
-            //create Hexagon
-            //Create_Hexagon();
-
+                 
             int l = 0;
 
             try
@@ -103,8 +98,7 @@ namespace Installer
                     throw new AccessViolationException("The Device not responding  may be disconnected");
                     //// need to add write to console the debug went down to boot
                 }
-
-                
+   
             }
 
 
@@ -121,8 +115,7 @@ namespace Installer
             else
                 results = images;
 
-
-            Utilities.Pause = true;
+                        
             l = jsonObject.install.list.Count;
             int count = 100 / l;
             Utilities.Progress = 10;
@@ -140,6 +133,10 @@ namespace Installer
                     continue;
                
                 boot = string.Format(@"fastboot flash {0} {1}\{2}", obj.partition, Path.GetDirectoryName(results[0]), obj.image);
+                
+                //pause update GUI while in fastboot
+                Utilities.Pause = true;
+
                 util.proc(boot, true);
                     
                 
@@ -153,28 +150,37 @@ namespace Installer
                 Utilities.Progress = l + count;                 
             }
             Utilities.Pause = false;
+            Utilities.Progress = 90;           
+        }
 
-            
-            boot = "fastboot reboot";
+
+        public void Fastboot_Reboot()
+        {
+            Utilities.Pause = true;
+            Utilities util = new Utilities();
+            string boot = "fastboot reboot";
             util.proc(boot, true);
-            
-           
+
+
             int cnt = 0;
             while (!Utilities.ConnectionVal.Equals("Connected") && cnt < 30)
-            {           
-                
+            {
+
                 Thread.Sleep(10000);
                 util.Check_devices();
                 cnt++;
                 Console.WriteLine(string.Format("try number {0} check if connected\n", cnt.ToString()));
             }
-            
+
             Thread.Sleep(60000);
 
             Utilities.Progress = 100;
             Thread.Sleep(1000);
             Utilities.Progress = 0;
-
+            
+            //Start check device connected
+            Utilities.Pause = false;
+        
         }
   
 

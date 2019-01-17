@@ -27,8 +27,7 @@ namespace Installer
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {
-        
+    {        
         public string Release_Val { get; set; }
         public string Serial_Val { get; set; }
         Utilities util = new Utilities();
@@ -40,6 +39,12 @@ namespace Installer
         public MainWindow()
         {
             InitializeComponent();
+
+            JsonParser J_S = new JsonParser();
+            FirsrHirc jsonObject = J_S.Parse();
+          
+            installer_.Title += jsonObject.install.version;
+
             logItems = new ObservableCollection<Item>()
             {
             new Item(){Text="Logger"}
@@ -56,7 +61,6 @@ namespace Installer
                 logo.Source = new BitmapImage(new Uri(iconsPath, UriKind.RelativeOrAbsolute));
           
            
-           
             BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += worker_DoWork;
             worker.RunWorkerAsync();
@@ -69,11 +73,10 @@ namespace Installer
             worker_check_battery.DoWork += worker_CheckBattary;
             worker_check_battery.RunWorkerAsync();
 
-            BackgroundWorker worker_check_release = new BackgroundWorker();
-            worker_check_release.DoWork += worker_CheckRelease;
-            //worker_check_release.RunWorkerAsync();            
+            //BackgroundWorker worker_check_release = new BackgroundWorker();
+            //worker_check_release.DoWork += worker_CheckRelease;
+            ////worker_check_release.RunWorkerAsync();            
           
-
           
             var t = Task.Run(() =>
             {
@@ -100,6 +103,7 @@ namespace Installer
         #region Install Images
         private void b_install_Click(object sender, RoutedEventArgs e)
         {
+           
             string[] empty = {};
             string[] dir = { };
             string[] results = { };
@@ -121,7 +125,7 @@ namespace Installer
 
 
             string[] files = Directory.GetFiles(dir[0], "*.img",
-                                         SearchOption.TopDirectoryOnly);
+                                         SearchOption.AllDirectories);
 
             List<string> files_ = new List<string>();
             List<string> inGame = new List<string>();
@@ -151,22 +155,41 @@ namespace Installer
 
             }
 
+            l_calib_files_val.Content = "None";
+            l_config_files_val.Content = "None";
+            l_engine_val.Content = "None";
+            l_hexagon_val.Content = "None";
+            l_release_val.Content = "None";
+            l_config_files_val.Content = "None";
+            Utilities.Hexagon = "";
 
+            Item k = new Item() {Text="Start instllation, it may take few minutes." };
+            logItems.Add(k);
+            var backgroundScheduler = TaskScheduler.Default;
+            var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();  
             var uiContext = SynchronizationContext.Current;
             this.Dispatcher.Invoke((Action)delegate
             {
-
-                Task.Run(() => install.Enter_Boot_Loader(empty)).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+                Item i = new Item() {Text = "wait while device is rebooting, the installation wait 60 sec after reboot"};
+                Task.Factory.StartNew(delegate { install.Enter_Boot_Loader(empty); },
+                         backgroundScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(i), null); }, uiScheduler).
+                ContinueWith(delegate { install.Fastboot_Reboot(); }, backgroundScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(i), null); }, uiScheduler);
+                   
 
             });
 
-            //var run = Task.Run(() => install.Enter_Boot_Loader()).ContinueWith(failedTask => Console.WriteLine("Device is not responding"),
-            //                 TaskContinuationOptions.OnlyOnFaulted); 
+           
 
         }
 
         private void b_pull_Click(object sender, RoutedEventArgs e)
         {
+            if (!Directory.Exists(con.Get_Pulled_Items_Path()))
+                Directory.CreateDirectory(con.Get_Pulled_Items_Path());
+            
             var uiContext = SynchronizationContext.Current;
             var t = Task.Run(() => pull()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
 
@@ -452,7 +475,26 @@ namespace Installer
             }
         }
 
-        void worker_CheckRelease(object sender, DoWorkEventArgs e)
+        //void worker_CheckRelease(object sender, DoWorkEventArgs e)
+        //{
+        //    while (true)
+        //    {
+        //        if (!Utilities.Pause)
+        //        {
+        //            try
+        //            {
+        //                util.Get_Release_and_Engine_Version();
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Console.WriteLine(ex);
+        //            }
+        //        }
+        //        Thread.Sleep(5000);
+        //    }
+        //}
+
+        void worker_CheckConnection(object sender, DoWorkEventArgs e)
         {
             while (true)
             {
@@ -460,33 +502,17 @@ namespace Installer
                 {
                     try
                     {
-                        util.Get_Release_and_Engine_Version();
+                        util.Check_devices();
+                        //Utilities.ConnectionVal = con.Connected();
+
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex);
-                    }
-                }
-                Thread.Sleep(5000);
-            }
-        }
+                        Utilities.ConnectionVal = con.Disconnected();
 
-        void worker_CheckConnection(object sender, DoWorkEventArgs e)
-        {
-            while (true)
-            {
-                try
-                {
-                    util.Check_devices();
-                    //Utilities.ConnectionVal = con.Connected();
-                   
+                    }
+                    Thread.Sleep(5000);
                 }
-                catch (Exception ex)
-                {
-                    Utilities.ConnectionVal = con.Disconnected();
-                   
-                }
-                Thread.Sleep(5000);
             }
         }
 
@@ -656,27 +682,83 @@ namespace Installer
 
             this.Dispatcher.Invoke((Action)delegate
             {
-                
-                Task.Run(() => Check_Release_and_Engine()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-                
-                Task.Run(() => util1.Check_devices()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-               
-                Task.Run(() => util2.Check_Calib_Files()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-              
-                Task.Run(() => util3.Check_Config_Files_Etc()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
 
-                Task.Run(() => util4.Check_Config_Files_Etc()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+                var backgroundScheduler = TaskScheduler.Default;
+                var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+
+                //Serial number
+                Task.Factory.StartNew(delegate { util1.Check_devices(); },
+                    backgroundScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+               ContinueWith(delegate { l_serial_val.Content = Utilities.SerialNum; }, uiScheduler);
+               
+                //Calibrations files
+                Task.Factory.StartNew(delegate { util2.Check_Calib_Files(); },
+                             backgroundScheduler).
+               ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+               ContinueWith(delegate { l_calib_files_val.Content = String.Join(", ", Utilities.CalibrationFiles.ToArray()); }, uiScheduler);
+
+                //Calib
+                Task.Factory.StartNew(delegate { util3.Check_Config_Files_Etc(); },
+                              backgroundScheduler).
+
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+                ContinueWith(delegate { l_config_files_val.Content = string.Join(", ", Utilities.ConfigFiles.ToArray()); }, uiScheduler);
+
+                //release and engine
+
+                Task.Factory.StartNew(delegate { util.Get_Release_and_Engine_Version(); },
+                              backgroundScheduler).
+
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+                ContinueWith(delegate { l_release_val.Content = Utilities.Release; }, uiScheduler).
+                ContinueWith(delegate { l_engine_val.Content = Utilities.Engine; }, uiScheduler);
+
+               //Hexagon
+
+                Task.Factory.StartNew(delegate { util4.Check_Hexagon_File(); },
+                              backgroundScheduler).
+
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+                ContinueWith(delegate { l_hexagon_val.Content = Utilities.Hexagon; }, uiScheduler);
+                
+          
+                
+                //Task.Run(() => util1.Check_devices()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+               
+                //Task.Run(() => util2.Check_Calib_Files()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+              
+                //Task.Run(() => util3.Check_Config_Files_Etc()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+
+                //Task.Run(() => util4.Check_Hexagon_File()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
                
 
             });
 
-            Thread.Sleep(4000);
-            l_calib_files_val.Content = String.Join(", ", Utilities.CalibrationFiles.ToArray());
-            l_config_files_val.Content = string.Join(", ", Utilities.ConfigFiles.ToArray());
-            l_serial_val.Content = Utilities.SerialNum;
-            l_release_val.Content = Utilities.Release;
-            l_engine_val.Content = Utilities.Engine;
-            l_hexagon_val.Content = Utilities.Hexagon;
+            Thread.Sleep(3000);
+            //l_calib_files_val.Content = String.Join(", ", Utilities.CalibrationFiles.ToArray());
+            //l_config_files_val.Content = string.Join(", ", Utilities.ConfigFiles.ToArray());
+            //l_serial_val.Content = Utilities.SerialNum;
+            //l_release_val.Content = Utilities.Release;
+            //l_engine_val.Content = Utilities.Engine;
+            //l_hexagon_val.Content = Utilities.Hexagon;
+            var bc = new BrushConverter();
+            if (string.IsNullOrEmpty(Utilities.Hexagon))
+                l_hexagon.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
+            if (Utilities.CalibrationFiles.Count < 1)
+                l_calib_file.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
+            if (Utilities.ConfigFiles.Count < 1)
+                l_config_files.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
+
+            
+
+
 
 
         } 
@@ -684,6 +766,8 @@ namespace Installer
 
         private void cb_enable_debug_Checked(object sender, RoutedEventArgs e)
         {
+            if (!Directory.Exists(con.Get_Pulled_Items_Path()))
+                Directory.CreateDirectory(con.Get_Pulled_Items_Path());
             if (!Convert.ToBoolean(cb_enable_debug.IsChecked))           
                 Utilities.EnableDebug = false;
            
@@ -725,6 +809,7 @@ namespace Installer
 
         private void One_Shot_Install_Click(object sender, RoutedEventArgs e)
         {
+            
 
             PushPullFiles pushPull = new PushPullFiles();
             var uiContext = SynchronizationContext.Current;
@@ -746,7 +831,15 @@ namespace Installer
             {
                 return;
             }
-            
+
+
+            l_calib_files_val.Content = "None";
+            l_config_files_val.Content = "None";
+            l_engine_val.Content = "None";
+            l_hexagon_val.Content = "None";
+            l_release_val.Content = "None";
+            l_config_files_val.Content = "None";
+            Utilities.Hexagon = "";
 
             if (!File.Exists(con.Get_ToInstall()))
                 return;
@@ -772,7 +865,7 @@ namespace Installer
             }
 
             //install images
-            Utilities.Progress = 10;
+            Utilities.Progress = 20;
             //if (imgFilePathsFiltered.Count > 0)
             //{
             //    var t2 = new Task(() => install.Install_APKs(imgFilePathsFiltered.ToArray()));
@@ -784,19 +877,38 @@ namespace Installer
             //}
             this.Dispatcher.Invoke((Action)delegate
             {
+
+                Item i = new Item() {Text="Waiting 60 seconds after reboot before continue" };
+                Item j = new Item() { Text = "Installing APKs" };
                 string pushHex= "";
                 if (hexFilePathsFiltered.Count > 0)
                      pushHex = string.Format("adb push {0} /system/lib/rfsa/adsp", hexFilePathsFiltered[0]);
                 //install images
-                Utilities.Progress = 10;
+                Utilities.Progress = 25;
                 var backgroundScheduler = TaskScheduler.Default;
                 var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();  
                 //install img
+                
+                //pause check device connectivity
+                Utilities.Pause = true;
                 Task.Factory.StartNew(delegate { install.Enter_Boot_Loader(imgFilePathsFiltered.ToArray()); },
                          backgroundScheduler).
                 ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
 
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(i), null); }, uiScheduler).
+
+                ContinueWith(delegate { Utilities.Pause = false; }, uiScheduler).
+
+                ContinueWith(delegate { install.Fastboot_Reboot(); },
+                             backgroundScheduler).
+
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+                
+
                 //install apk
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(j), null); }, uiScheduler).
+
                 ContinueWith(delegate { install.Install_APKs(apkFilePathsFiltered.ToArray()); },
                              backgroundScheduler).
 
@@ -833,7 +945,8 @@ namespace Installer
 
                 Utilities.Progress = 0;
 
-
+                //pause check device connectivity
+                Utilities.Pause = true;
                
 
             });
@@ -844,10 +957,28 @@ namespace Installer
             
                     
 
-        }                                          
-                                                   
-           
+        }
 
+        private void b_reboot_Click(object sender, RoutedEventArgs e)
+        {
+            Utilities util = new Utilities();
+            var uiContext = SynchronizationContext.Current;
+            Item i = new Item() { Text = "Rebooting..." };
+            var backgroundScheduler = TaskScheduler.Default;
+            var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+            this.Dispatcher.Invoke((Action)delegate
+           {
+               Task.Factory.StartNew(delegate { util.Reboot(); },
+                            backgroundScheduler).
+                   ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler);
+
+
+           });
+            
+        }
+
+       
        
     }
 

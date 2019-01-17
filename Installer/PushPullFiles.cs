@@ -181,12 +181,13 @@ namespace Installer
         {
             Constants con = new Constants();
             bool flag = false;
+            string path = Path.Combine(con.Get_Pulled_Items_Path(), con.Get_debugConfig_File());
             
-            var t = File.ReadLines(con.Get_debugConfig_File());
+            var t = File.ReadLines(path);
 
             if (t.Count() == 0)
             {
-                TextToLog.Text += string.Format("couldn't find file {0}", con.Get_debugConfig_File());
+                TextToLog.Text += string.Format("couldn't find file {0}", path);
                 throw new FileNotFoundException();
             }
 
@@ -217,7 +218,7 @@ namespace Installer
                     string d = string.Join("\n", f);
                     try
                     {
-                        File.WriteAllText(con.Get_debugConfig_File(), d);
+                        File.WriteAllText(path, d);
                     }
                     catch (Exception ex)
                     {

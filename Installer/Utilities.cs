@@ -105,12 +105,23 @@ namespace Installer
         {            
             proc(string.Format("adb shell ls {0}", con.Get_Hexagon()));
             Thread.Sleep(500);
-            Regex rx = new Regex(@"testsig-0x\d+\D+.so");
+            Regex rx = new Regex(@"testsig.*");
             Match matchCon = rx.Match(Output);
             if (matchCon.Success)
             {
                 Hexagon = matchCon.Value;
             }
+        }
+
+
+        public void Reboot()
+        {
+            Progress = 10;
+            proc(string.Format("adb reboot"));
+            Progress = 90;
+
+            Thread.Sleep(5000);
+            Progress = 0;
         }
 
         public void Check_Config_Files_Etc()
@@ -195,7 +206,7 @@ namespace Installer
             if (!match.Success)
             {
                 TextToLog.Text += string.Format("couldn't receive the build number\n");
-                throw new NullReferenceException();
+                //throw new NullReferenceException();
             }
             Release = match.Value;
            
@@ -204,7 +215,7 @@ namespace Installer
             if (!match1.Success)
             {
                 TextToLog.Text += string.Format("couldn't receive the Engine Version\n");
-                throw new NullReferenceException();
+                //throw new NullReferenceException();
             }
             Engine = match1.Value;
             

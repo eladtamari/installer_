@@ -16,6 +16,7 @@ namespace Installer
         public static string Fail_Color { get; set; }
         public static string Fastboot_Color { get; set; }
         public static string Warning_Color { get; set; }
+        public static string FileMissing { get; set; }
        
         public Constants()
         {
@@ -23,12 +24,13 @@ namespace Installer
             Fail_Color =  "#ff6666";  //"#FFDC9D96";
             Fastboot_Color = "#94b8b8";
             Warning_Color = "#ffc266";
+            FileMissing = "#ff4d4d";
             
         }
 
         const string adbIpAddress = "192.168.137.1";
         const string adbPort = "5556";
-
+        const string pulledItems = "PulledItems";
         const string hexagonPyCreator = "elfsigner.py";
         const string toInstall = "ToInstall.txt";
         const string jsonFile = "Config.JSON";
@@ -62,6 +64,11 @@ namespace Installer
         {
             string[] ipAddressAndPort = { adbIpAddress, adbPort };
             return ipAddressAndPort;
+        }
+
+        public string Get_Pulled_Items_Path()
+        {
+            return pulledItems;
         }
 
         public string Get_Elfsigner_Py()
@@ -170,12 +177,12 @@ namespace Installer
 
         public string Pull_Item(string path, string item)
         {
-            return String.Format("{0} {1} {2}/{3}", adb, pull, path, item);
+            return String.Format("{0} {1} {2}/{3} {4}", adb, pull, path, item, pulledItems);
         }
 
         public string Push_Item(string item, string target)
         {
-            return String.Format("{0} {1} {2} {3}", adb, push, item, target);
+            return String.Format("{0} {1} {2}/{3} {4}", adb, push, pulledItems, item, target);
         }
 
         public string[] Get_Cal_Files()

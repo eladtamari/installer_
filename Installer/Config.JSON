@@ -1,24 +1,26 @@
 {
-  "install": {
-    "name": "images",
-    "list": [
-        {
-            
-            "partition": "system",
-            "image": "system.img"
-        },
-        {
-            "partition": "boot",
-            "image": "boot.img"
-        },
-        {
-            "partition": "userdata",
-            "image": "userdata.img"
-        },
-        { "partition":"persist",
-		     "image":"persist.img"
-	}
-	   
-    ]
-  }
+    "install": {
+        "version": "1.0.0.1",
+        "name": "images",
+        "list": [
+            {
+
+                "partition": "system",
+                "image": "system.img"
+            },
+            {
+                "partition": "boot",
+                "image": "boot.img"
+            },
+            {
+                "partition": "userdata",
+                "image": "userdata.img"
+            },
+            {
+                "partition": "persist",
+                "image": "persist.img"
+            }
+
+        ]
+    }
 }

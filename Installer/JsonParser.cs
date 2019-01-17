@@ -29,6 +29,7 @@ namespace Installer
     public class InstallList
     {
         public string name { get; set; }
+        public string version { get; set; }
         public List<ImagesList> list { get; set; }
 
     }
