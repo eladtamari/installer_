@@ -20,6 +20,8 @@ namespace Installer
     /// </summary>
     public partial class installedItemsOneShot : Window
     {
+        Constants con = new Constants();
+
         List<string> resultCal = new List<string>();
         List<string> resultImg = new List<string>();
         List<string> resultApk = new List<string>();
@@ -118,6 +120,8 @@ namespace Installer
         {
             InitializeComponent();
 
+            File.Delete(con.Get_ToInstall());
+
             foreach (var item in Install.imgFilePaths)
 
                 
@@ -206,27 +210,27 @@ namespace Installer
             {
                 foreach (var line in apkItems)
                 {
-                    // If the line doesn't contain the word 'Second', write the line to the file.
+                    
                     if (line.Checked == true)                    
                         file.WriteLine(line.Text);                  
                 }
 
                 foreach (var line in imgItems)
                 {
-                    // If the line doesn't contain the word 'Second', write the line to the file.
+                    
                     if (line.Checked == true)
                         file.WriteLine(line.Text);
                 }
 
                 foreach (var line in calItems)
                 {
-                    // If the line doesn't contain the word 'Second', write the line to the file.
+                   
                     if (line.Checked == true)
                         file.WriteLine(line.Text);
                 }
                 foreach (var line in hexItems)
                 {
-                    // If the line doesn't contain the word 'Second', write the line to the file.
+                   
                     if (line.Checked == true)
                         file.WriteLine(line.Text);
                 }

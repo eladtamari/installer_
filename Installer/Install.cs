@@ -178,7 +178,7 @@ namespace Installer
         }
   
 
-        public void One_shot_Install()
+        public bool One_shot_Install()
         {
         //form to summerize the preinstall
             //in the form img, apk, cal, hexagon, config
@@ -192,17 +192,15 @@ namespace Installer
             string[] dirs = { };
             var dialog = new CommonOpenFileDialog();
             dialog.IsFolderPicker = true;
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                dirs = dialog.FileNames.ToArray();
-            }
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)            
+                dirs = dialog.FileNames.ToArray();            
+            else            
+                return false;
             
 
-            if (dirs.Length < 1)
-            {
-               
-                return;
-            }
+            if (dirs.Length < 1)          
+               return false;
+            
 
             //show all apks in the folder
              apkFilePaths = Directory.GetFiles(dirs[0], "*.apk",
@@ -211,7 +209,7 @@ namespace Installer
              imgFilePaths = Directory.GetFiles(dirs[0], "*.img",
                                          SearchOption.AllDirectories).ToList();
 
-             hexFilePaths = Directory.GetFiles(dirs[0], "*.so",
+             hexFilePaths = Directory.GetFiles(dirs[0], "test*.so",
                                          SearchOption.AllDirectories).ToList();
             
              iniFilePaths = Directory.GetFiles(dirs[0], "*.ini",
@@ -243,15 +241,7 @@ namespace Installer
              }
 
              imgFilePaths = files_;
-
-
-            //string[] results = { };
-            //var items = new installedItems(filePaths.ToList());
-            //if ((bool)items.ShowDialog() == true)
-            //{
-            //    results = System.IO.File.ReadAllLines(con.Get_ToInstall());
-
-            //}
+             return true;
         }
     }
 }

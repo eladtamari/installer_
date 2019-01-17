@@ -46,7 +46,7 @@ namespace Installer
             Utilities util = new Utilities();
             if (progress)
                 Utilities.Progress = 20;
-            foreach (string cal in con.Get_Cal_Files())
+            foreach (string cal in results)
             {
                 util.proc(con.Push_Item(cal, con.Get_Iar_Path()), true, 5000);
                 if (progress)

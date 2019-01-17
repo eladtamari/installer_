@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,11 +20,14 @@ namespace Installer
     /// </summary>
     public partial class installedItems : Window
     {
+        Constants con = new Constants();
         List<string> output = new List<string>();
         List<CheckBoxListItem> items1 = new List<CheckBoxListItem>();
         public installedItems(List<string> appList)
         {
             InitializeComponent();
+
+            File.Delete(con.Get_ToInstall());
 
             foreach (var item in appList)
             {

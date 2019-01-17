@@ -142,7 +142,7 @@ namespace Installer
             }
 
 
-            //show all apks in the folder
+            //show all images in the folder
 
             var items = new installedItems(files_.ToList());
             if (!(bool)items.ShowDialog() == true)
@@ -196,7 +196,7 @@ namespace Installer
             Utilities.Progress = 20;
             //set dir to where hexagon factory ask it 
             string originDir = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(string.Format(@"../../{0}", con.Get_Elfsigner()));
+            Directory.SetCurrentDirectory(string.Format(@"{0}", con.Get_Elfsigner()));
             string o = Directory.GetCurrentDirectory();
             Console.WriteLine(o);
             Utilities.Progress = 25;
@@ -650,6 +650,8 @@ namespace Installer
             Utilities util1 = new Utilities();
             Utilities util2 = new Utilities();
             Utilities util3 = new Utilities();
+            Utilities util4 = new Utilities();
+
             var uiContext = SynchronizationContext.Current;
 
             this.Dispatcher.Invoke((Action)delegate
@@ -662,6 +664,8 @@ namespace Installer
                 Task.Run(() => util2.Check_Calib_Files()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
               
                 Task.Run(() => util3.Check_Config_Files_Etc()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+
+                Task.Run(() => util4.Check_Config_Files_Etc()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
                
 
             });
@@ -672,6 +676,7 @@ namespace Installer
             l_serial_val.Content = Utilities.SerialNum;
             l_release_val.Content = Utilities.Release;
             l_engine_val.Content = Utilities.Engine;
+            l_hexagon_val.Content = Utilities.Hexagon;
 
 
         } 
@@ -732,11 +737,20 @@ namespace Installer
                              
 
             Install install = new Install();
-            install.One_shot_Install();
+            if (!install.One_shot_Install())
+                return;
             
 
             var items = new installedItemsOneShot();
-            items.ShowDialog();
+            if ((bool)items.ShowDialog() == false)
+            {
+                return;
+            }
+            
+
+            if (!File.Exists(con.Get_ToInstall()))
+                return;
+
             var files = File.ReadAllLines(con.Get_ToInstall());
             foreach (var item in files)
             {
@@ -751,7 +765,7 @@ namespace Installer
                 }
                 if (System.IO.Path.GetExtension(item).Equals(".cal"))
                     calFilePathsFiltered.Add(item);
-                if (System.IO.Path.GetExtension(item).Equals(".so"))
+                if (System.IO.Path.GetExtension(item).Equals(".so") && item.Contains("testsig-0x"))                    
                     hexFilePathsFiltered.Add(item);
                 if (System.IO.Path.GetExtension(item).Equals(".ini"))
                     iniFilePathsFiltered.Add(item);

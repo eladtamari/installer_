@@ -31,7 +31,7 @@ namespace Installer
 
        
         public static bool Connect { get; set; }
-              
+        public static string  Hexagon { get; set; }
         public static bool EnableDebug { get; set; }
         public static Item TextToLog { get; set; }
         Constants con = new Constants();
@@ -100,6 +100,18 @@ namespace Installer
         public static List<string> ConfigFiles { get; set; }
         public static  List<string> CalibrationFiles { get; set; }
         public ConsoleContent dc { get; set; }
+
+        public void Check_Hexagon_File()
+        {            
+            proc(string.Format("adb shell ls {0}", con.Get_Hexagon()));
+            Thread.Sleep(500);
+            Regex rx = new Regex(@"testsig-0x\d+\D+.so");
+            Match matchCon = rx.Match(Output);
+            if (matchCon.Success)
+            {
+                Hexagon = matchCon.Value;
+            }
+        }
 
         public void Check_Config_Files_Etc()
         {            
