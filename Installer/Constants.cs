@@ -17,6 +17,8 @@ namespace Installer
         public static string Fastboot_Color { get; set; }
         public static string Warning_Color { get; set; }
         public static string FileMissing { get; set; }
+        public static string BlackForeground { get; set; }
+        public static string BackgroungUnkown { get; set; }
        
         public Constants()
         {
@@ -25,6 +27,8 @@ namespace Installer
             Fastboot_Color = "#94b8b8";
             Warning_Color = "#ffc266";
             FileMissing = "#ff4d4d";
+            BlackForeground = "#000000";
+            BackgroungUnkown = "#ffe6e6";
             
         }
 

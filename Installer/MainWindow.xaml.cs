@@ -535,6 +535,50 @@ namespace Installer
                 this.Dispatcher.Invoke(() =>
                 {
                     l_connected.Content = Utilities.ConnectionVal;
+                    if (Utilities.ConnectionVal == "Connected")
+                    {
+                        b_connect.IsEnabled = true;
+                        b_install.IsEnabled = true;
+                        b_install_apk.IsEnabled = true;
+                        b_one_shot_install.IsEnabled = true;
+                        b_pull.IsEnabled = true;
+                        b_push_calib.IsEnabled = true;
+                        b_push_hex.IsEnabled = true;
+                        b_reboot.IsEnabled = true;
+                        b_refresh.IsEnabled = true;
+                        cb_enable_debug.IsEnabled = true;
+                    }
+                    else if (Utilities.ConnectionVal == "Fastboot")
+                    {
+                        b_connect.IsEnabled = false;
+                        b_install.IsEnabled = true;
+                        b_install_apk.IsEnabled = false;
+                        b_one_shot_install.IsEnabled = true;
+                        b_pull.IsEnabled = false;
+                        b_push_calib.IsEnabled = false;
+                        b_push_hex.IsEnabled = false;
+                        b_reboot.IsEnabled = false;
+                        b_refresh.IsEnabled = false;
+                        cb_enable_debug.IsEnabled = false;
+                        Utilities.BatteryLevel = 0;
+                        
+                    }
+                    else
+                    {
+                        b_connect.IsEnabled = false;
+                        b_install.IsEnabled = false;
+                        b_install_apk.IsEnabled = false;
+                        b_one_shot_install.IsEnabled = false;
+                        b_pull.IsEnabled = false;
+                        b_push_calib.IsEnabled = false;
+                        b_push_hex.IsEnabled = false;
+                        b_reboot.IsEnabled = false;
+                        b_refresh.IsEnabled = false;
+                        cb_enable_debug.IsEnabled = false;
+                        Utilities.BatteryLevel = 0;
+                        
+                    
+                    }
 
                 });
 
@@ -742,19 +786,20 @@ namespace Installer
             });
 
             Thread.Sleep(3000);
-            //l_calib_files_val.Content = String.Join(", ", Utilities.CalibrationFiles.ToArray());
-            //l_config_files_val.Content = string.Join(", ", Utilities.ConfigFiles.ToArray());
-            //l_serial_val.Content = Utilities.SerialNum;
-            //l_release_val.Content = Utilities.Release;
-            //l_engine_val.Content = Utilities.Engine;
-            //l_hexagon_val.Content = Utilities.Hexagon;
+            
             var bc = new BrushConverter();
             if (string.IsNullOrEmpty(Utilities.Hexagon))
                 l_hexagon.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
+            else
+                l_hexagon.Foreground = (Brush)bc.ConvertFromString(Constants.BlackForeground);
             if (Utilities.CalibrationFiles.Count < 1)
                 l_calib_file.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
+            else
+                l_calib_file.Foreground = (Brush)bc.ConvertFromString(Constants.BlackForeground);
             if (Utilities.ConfigFiles.Count < 1)
                 l_config_files.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
+            else
+                l_config_files.Foreground = (Brush)bc.ConvertFromString(Constants.BlackForeground);
 
             
 

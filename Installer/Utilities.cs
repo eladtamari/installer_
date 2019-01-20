@@ -61,6 +61,7 @@ namespace Installer
                 {
                     Connect = false;
                     ConnectionColor = Constants.Fail_Color;
+                    
                 }
                
             }
