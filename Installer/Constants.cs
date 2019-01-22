@@ -19,6 +19,8 @@ namespace Installer
         public static string FileMissing { get; set; }
         public static string BlackForeground { get; set; }
         public static string BackgroungUnkown { get; set; }
+        public static string White { get; set; }
+        public static string Orange { get; set; }
        
         public Constants()
         {
@@ -29,6 +31,9 @@ namespace Installer
             FileMissing = "#ff4d4d";
             BlackForeground = "#000000";
             BackgroungUnkown = "#ffe6e6";
+            White = "#ffffff";
+            Orange = "#ff471a";
+
             
         }
 
@@ -187,6 +192,12 @@ namespace Installer
         public string Push_Item(string item, string target)
         {
             return String.Format("{0} {1} {2}/{3} {4}", adb, push, pulledItems, item, target);
+        }
+
+        public string Push_Item_from_here(string item, string target)
+        {
+            string b = String.Format("{0} {1} {2} {3}", adb, push, item, target);
+            return b;
         }
 
         public string[] Get_Cal_Files()

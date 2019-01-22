@@ -17,7 +17,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <Button x:Name="b_done_list" Content="Done" HorizontalAlignment="Left" Margin="480,13,0,0" VerticalAlignment="Top" Width="75" Click="b_done_list_Click" IsDefault="True"/>
-        <CheckBox x:Name="cb_all" Content="CheckBox" HorizontalAlignment="Left" Margin="213,16,0,0" VerticalAlignment="Top" IsChecked="True" Click="cb_all_Change"/>
+        <CheckBox x:Name="cb_all" Content="All" HorizontalAlignment="Left" Margin="213,16,0,0" VerticalAlignment="Top" IsChecked="True" Click="cb_all_Change"/>
     </Grid>
 
 </Window>

@@ -41,26 +41,34 @@ namespace Installer
             InitializeComponent();
 
             JsonParser J_S = new JsonParser();
-            FirsrHirc jsonObject = J_S.Parse();
-          
+            FirsrHirc jsonObject = J_S.Parse();          
             installer_.Title += jsonObject.install.version;
 
+
+            //new log collection
             logItems = new ObservableCollection<Item>()
             {
             new Item(){Text="Logger"}
             };
-            log.ItemsSource = logItems;
+            
 
-
+            var bc = new BrushConverter();
+            Utilities.LogTextColor = (System.Windows.Media.Brush)bc.ConvertFromString(Constants.White);
+            Utilities.Hexagon = "";
             Utilities.EnableDebug = false;
 
-            string iconsPath;
+            //bind the log collection to its UI asset
+            log.ItemsSource = logItems;
+
+            
             //set the infinity icon
+            string iconsPath;
             iconsPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "INFINITY_logo.jpg");
             if (File.Exists(iconsPath))
                 logo.Source = new BitmapImage(new Uri(iconsPath, UriKind.RelativeOrAbsolute));
           
            
+            //Start the backgroung workers
             BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += worker_DoWork;
             worker.RunWorkerAsync();
@@ -73,11 +81,8 @@ namespace Installer
             worker_check_battery.DoWork += worker_CheckBattary;
             worker_check_battery.RunWorkerAsync();
 
-            //BackgroundWorker worker_check_release = new BackgroundWorker();
-            //worker_check_release.DoWork += worker_CheckRelease;
-            ////worker_check_release.RunWorkerAsync();            
-          
-          
+            
+            //read the serial number
             var t = Task.Run(() =>
             {
                 try
@@ -220,6 +225,7 @@ namespace Installer
             //set dir to where hexagon factory ask it 
             string originDir = Directory.GetCurrentDirectory();
             Directory.SetCurrentDirectory(string.Format(@"{0}", con.Get_Elfsigner()));
+            Thread.Sleep(1000);
             string o = Directory.GetCurrentDirectory();
             Console.WriteLine(o);
             Utilities.Progress = 25;
@@ -270,24 +276,40 @@ namespace Installer
             Utilities.Progress = 100;
             Thread.Sleep(1000);
             Utilities.Progress = 0;
+            Utilities.WarningReboot = "Warning!!! Reboot Requiered";
+            this.Dispatcher.Invoke((Action)delegate
+            {
+                l_warning.Content = Utilities.WarningReboot;
+            });
         } 
         #endregion
 
+        #region Push Hexagon
         private void b_push_hex_Click(object sender, RoutedEventArgs e)
         {
             var uiContext = SynchronizationContext.Current;
-            
+            var backgroundScheduler = TaskScheduler.Default;
+            var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            var bc = new BrushConverter();
+
+
             this.Dispatcher.Invoke((Action)delegate
             {
 
-                Task.Run(() => Create_Hexagon()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+                //Task.Run(() => Create_Hexagon()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
 
-            });
-            
-            
+                Task.Factory.StartNew(delegate { Create_Hexagon(); },
+                   backgroundScheduler).
+               ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
 
+               ContinueWith(delegate { uiContext.Send(x => Utilities.LogTextColor = (System.Windows.Media.Brush)bc.ConvertFromString(Constants.Orange), null); }, uiScheduler).
 
+               ContinueWith(delegate { uiContext.Send(x => logItems.Add(new Item() { Text = "Warning!!! Please Reboot in order to load Hexagon file" }), null); }, uiScheduler);
+
+            }); 
+        
         }
+        #endregion
 
         #region push calibration files
         private void b_push_cal_Click(object sender, RoutedEventArgs e)
@@ -342,13 +364,9 @@ namespace Installer
         } 
         #endregion
 
-        
-        private void b_enable_disable_debug_Click(object sender, RoutedEventArgs e)
-        {
-            
-           
-        }
 
+
+        #region pull files to pulled items
         private void pull()
         {
             PushPullFiles pushPull = new PushPullFiles();
@@ -363,11 +381,13 @@ namespace Installer
                 Console.Write(ex);
             }
 
-        }
+        } 
+        #endregion
 
+        #region Push Hexagon file
         private void pushHex(string[] results)
         {
-            Utilities util = new Utilities();            
+            Utilities util = new Utilities();
             Constants con = new Constants();
 
             PushPullFiles pushPull = new PushPullFiles();
@@ -376,16 +396,18 @@ namespace Installer
             try
             {
                 util.Check_devices();
-                
+
                 pushPull.PushHex(results, true);
             }
             catch (Exception ex)
             {
-               // throw new Exception("Cant push files");
-               
+                // throw new Exception("Cant push files");
+
             }
         }
 
+        #endregion
+        #region push calib files
         private void pushCalib(string[] results)
         {
             Utilities util = new Utilities();
@@ -402,14 +424,16 @@ namespace Installer
             }
             catch (Exception ex)
             {
-                // throw new Exception("Cant push files");
+                throw new Exception("Cant push files");
 
             }
-        }
+        } 
+        #endregion
 
+        #region Pull Edit and push debugConfig.ini
         private void pullEditPush()
         {
-        
+
             Utilities util = new Utilities();
             PushPullFiles pushPull = new PushPullFiles();
             try
@@ -435,7 +459,9 @@ namespace Installer
             ofd.ShowDialog();
         }
 
+        #endregion
 
+        #region Worker Check battery
         void worker_CheckBattary(object sender, DoWorkEventArgs e)
         {
             Utilities util = new Utilities();
@@ -452,13 +478,15 @@ namespace Installer
                     {
                         Console.WriteLine(ex);
                     }
- 
+
                 }
                 Thread.Sleep(5000);
             }
-        }
+        } 
+        #endregion
 
 
+        #region Check release and engine version
         private void Check_Release_and_Engine()
         {
             try
@@ -473,27 +501,11 @@ namespace Installer
 
                 //throw ex;
             }
-        }
+        } 
+        #endregion
 
-        //void worker_CheckRelease(object sender, DoWorkEventArgs e)
-        //{
-        //    while (true)
-        //    {
-        //        if (!Utilities.Pause)
-        //        {
-        //            try
-        //            {
-        //                util.Get_Release_and_Engine_Version();
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Console.WriteLine(ex);
-        //            }
-        //        }
-        //        Thread.Sleep(5000);
-        //    }
-        //}
 
+        #region Worker Check Connection
         void worker_CheckConnection(object sender, DoWorkEventArgs e)
         {
             while (true)
@@ -511,10 +523,11 @@ namespace Installer
                         Utilities.ConnectionVal = con.Disconnected();
 
                     }
-                    Thread.Sleep(5000);
+                    Thread.Sleep(2000);
                 }
             }
-        }
+        } 
+        #endregion
 
         #region worker update the gui's values
         void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -671,7 +684,7 @@ namespace Installer
 
             //show all apks in the folder
             string[] filePaths = Directory.GetFiles(dirs[0], "*.apk",
-                                         SearchOption.TopDirectoryOnly);
+                                         SearchOption.AllDirectories);
 
 
             string[] results = { };
@@ -721,6 +734,7 @@ namespace Installer
             Utilities util2 = new Utilities();
             Utilities util3 = new Utilities();
             Utilities util4 = new Utilities();
+            PushPullFiles pp = new PushPullFiles();
 
             var uiContext = SynchronizationContext.Current;
 
@@ -730,6 +744,12 @@ namespace Installer
                 var backgroundScheduler = TaskScheduler.Default;
                 var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
+                //Vendor
+                Task.Factory.StartNew(delegate { pp.Pull_Config_File(); },
+                    backgroundScheduler).
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+               ContinueWith(delegate { l_vedor_val.Content = Utilities.Vendor; }, uiScheduler);
 
                 //Serial number
                 Task.Factory.StartNew(delegate { util1.Check_devices(); },
@@ -770,23 +790,24 @@ namespace Installer
 
                 ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
 
-                ContinueWith(delegate { l_hexagon_val.Content = Utilities.Hexagon; }, uiScheduler);
-                
-          
-                
-                //Task.Run(() => util1.Check_devices()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-               
-                //Task.Run(() => util2.Check_Calib_Files()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-              
-                //Task.Run(() => util3.Check_Config_Files_Etc()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
+                ContinueWith(delegate { l_hexagon_val.Content = Utilities.Hexagon; }, uiScheduler).
 
-                //Task.Run(() => util4.Check_Hexagon_File()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
-               
-
+                ContinueWith(delegate { Refresh_Device_Prop(); }, uiScheduler);
+                        
             });
 
-            Thread.Sleep(3000);
-            
+        } 
+
+
+        #endregion
+
+        #region Refresh UI elements
+        private void Refresh_Device_Prop()
+        //if files missing after refresh show header in red
+        {
+            l_warning.Content = Utilities.WarningReboot;
+            Utilities.WarningReboot = "";
+
             var bc = new BrushConverter();
             if (string.IsNullOrEmpty(Utilities.Hexagon))
                 l_hexagon.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
@@ -800,35 +821,32 @@ namespace Installer
                 l_config_files.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
             else
                 l_config_files.Foreground = (Brush)bc.ConvertFromString(Constants.BlackForeground);
-
-            
-
-
-
-
         } 
         #endregion
 
+        #region CheckBox Enable/disable
         private void cb_enable_debug_Checked(object sender, RoutedEventArgs e)
         {
             if (!Directory.Exists(con.Get_Pulled_Items_Path()))
                 Directory.CreateDirectory(con.Get_Pulled_Items_Path());
-            if (!Convert.ToBoolean(cb_enable_debug.IsChecked))           
+            if (!Convert.ToBoolean(cb_enable_debug.IsChecked))
                 Utilities.EnableDebug = false;
-           
+
             else
                 Utilities.EnableDebug = true;
 
             var uiContext = SynchronizationContext.Current;
             this.Dispatcher.Invoke((Action)delegate
             {
-               
+
                 Task.Run(() => pullEditPush()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
 
             });
-               
-        }
 
+        } 
+        #endregion
+
+        #region connect to IP
         private void b_connect_Click(object sender, RoutedEventArgs e)
         {
             var uiContext = SynchronizationContext.Current;
@@ -846,30 +864,32 @@ namespace Installer
 
             this.Dispatcher.Invoke((Action)delegate
             {
-                
+
                 Task.Run(() => util.Adb_Connect_Disconnect()).ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
 
             });
-        }
+        } 
+        #endregion
 
+        #region Oneshot install
         private void One_Shot_Install_Click(object sender, RoutedEventArgs e)
         {
-            
+
 
             PushPullFiles pushPull = new PushPullFiles();
             var uiContext = SynchronizationContext.Current;
-            
+
             List<string> apkFilePathsFiltered = new List<string>();
             List<string> imgFilePathsFiltered = new List<string>();
             List<string> calFilePathsFiltered = new List<string>();
             List<string> hexFilePathsFiltered = new List<string>();
             List<string> iniFilePathsFiltered = new List<string>();
-                             
+
 
             Install install = new Install();
             if (!install.One_shot_Install())
                 return;
-            
+
 
             var items = new installedItemsOneShot();
             if ((bool)items.ShowDialog() == false)
@@ -898,12 +918,12 @@ namespace Installer
 
                 if (System.IO.Path.GetExtension(item).Equals(".apk"))
                 {
-                    
+
                     apkFilePathsFiltered.Add(item);
                 }
                 if (System.IO.Path.GetExtension(item).Equals(".cal"))
                     calFilePathsFiltered.Add(item);
-                if (System.IO.Path.GetExtension(item).Equals(".so") && item.Contains("testsig-0x"))                    
+                if (System.IO.Path.GetExtension(item).Equals(".so") && item.Contains("testsig-0x"))
                     hexFilePathsFiltered.Add(item);
                 if (System.IO.Path.GetExtension(item).Equals(".ini"))
                     iniFilePathsFiltered.Add(item);
@@ -918,22 +938,22 @@ namespace Installer
             //    Utilities.Progress += 10 ;
             //    await t1.ContinueWith(task => uiContext.Send(x => logItems.Add(Utilities.TextToLog), null));
             //    //await t1.ContinueWith(t2.Start());
-            
+
             //}
             this.Dispatcher.Invoke((Action)delegate
             {
 
-                Item i = new Item() {Text="Waiting 60 seconds after reboot before continue" };
+                Item i = new Item() { Text = "Waiting 60 seconds after reboot before continue" };
                 Item j = new Item() { Text = "Installing APKs" };
-                string pushHex= "";
+                string pushHex = "";
                 if (hexFilePathsFiltered.Count > 0)
-                     pushHex = string.Format("adb push {0} /system/lib/rfsa/adsp", hexFilePathsFiltered[0]);
+                    pushHex = string.Format("adb push {0} /system/lib/rfsa/adsp", hexFilePathsFiltered[0]);
                 //install images
                 Utilities.Progress = 25;
                 var backgroundScheduler = TaskScheduler.Default;
-                var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();  
+                var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
                 //install img
-                
+
                 //pause check device connectivity
                 Utilities.Pause = true;
                 Task.Factory.StartNew(delegate { install.Enter_Boot_Loader(imgFilePathsFiltered.ToArray()); },
@@ -949,7 +969,7 @@ namespace Installer
 
                 ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
 
-                
+
 
                 //install apk
                 ContinueWith(delegate { uiContext.Send(x => logItems.Add(j), null); }, uiScheduler).
@@ -982,19 +1002,23 @@ namespace Installer
                 //copy hexagon
                 ContinueWith(delegate { util.proc(pushHex, true); },
                              backgroundScheduler).
-                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler);
-                
-                
-                
-         
+                ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler).
+
+                ContinueWith(delegate { util.proc("adb reboot", true); },
+                             backgroundScheduler);
+
+
+
+
 
                 Utilities.Progress = 0;
 
                 //pause check device connectivity
                 Utilities.Pause = true;
-               
 
-            });
+
+            }); 
+        
 
             
             //install apk
@@ -1003,9 +1027,12 @@ namespace Installer
                     
 
         }
+        #endregion
 
+        #region Reboot
         private void b_reboot_Click(object sender, RoutedEventArgs e)
         {
+            
             Utilities util = new Utilities();
             var uiContext = SynchronizationContext.Current;
             Item i = new Item() { Text = "Rebooting..." };
@@ -1018,12 +1045,15 @@ namespace Installer
                             backgroundScheduler).
                    ContinueWith(delegate { uiContext.Send(x => logItems.Add(Utilities.TextToLog), null); }, uiScheduler);
 
+               l_warning.Content = "";
+
 
            });
-            
+
         }
 
-       
+
+        #endregion
        
     }
 
@@ -1031,7 +1061,7 @@ namespace Installer
 //class for logging object to add to logItems collection
 public class Item
 {
-    public string Text { get; set; }
+    public string Text { get; set; }   
 }
 
 }

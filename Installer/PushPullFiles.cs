@@ -29,7 +29,7 @@ namespace Installer
 
             if (progress)
                 Utilities.Progress = 10;
-            util.proc(con.Push_Item(results[0], con.Get_Iar_Path()), true, 5000);
+            util.proc(con.Push_Item_from_here(results[0], con.Get_Iar_Path()), true, 5000);
             if (progress)
             {
                 Utilities.Progress = 100;
@@ -41,14 +41,18 @@ namespace Installer
 
         public void PushCalib(string[] results, bool progress = false)
         {
-            //push calib files
             Constants con = new Constants();
+            string calPath;  
+            //push calib files
+            
             Utilities util = new Utilities();
             if (progress)
                 Utilities.Progress = 20;
             foreach (string cal in results)
             {
-                util.proc(con.Push_Item(cal, con.Get_Iar_Path()), true, 5000);
+                calPath = con.Push_Item_from_here(cal, con.Get_Iar_Path());
+       
+                util.proc(calPath, true, 5000);
                 if (progress)
                     Utilities.Progress += 20;
                 
@@ -60,6 +64,57 @@ namespace Installer
                 Utilities.Progress = 0;
             }
 
+        }
+
+        public void Pull_Config_File(bool progress = false)
+        {
+            Utilities util = new Utilities();
+            Constants con = new Constants();
+            
+            string adbCmd = con.Pull_Item(con.Get_Iar_Path(), con.Get_Config_file());
+
+            try
+            {
+                //TextToLog.Text += adbCmd;
+                if (progress)
+                    Utilities.Progress = 10;
+                util.proc(adbCmd, false, 5000);
+                if (progress)
+                    Utilities.Progress = 30;
+                bool fe = File.Exists(Path.Combine(con.Get_Pulled_Items_Path(), con.Get_Config_file())) ? true : false;
+                if (!fe)
+                {
+                    TextToLog.Text += string.Format("couldn't find file {0}", Path.Combine(con.Get_Pulled_Items_Path(), con.Get_Config_file()));
+                    return;
+                    //throw new FileNotFoundException();
+                }
+
+            }
+            catch (FileNotFoundException ex)
+            {
+                TextToLog.Text += string.Format(ex.Message);
+            }
+
+            string[] fd = File.ReadAllLines(Path.Combine(con.Get_Pulled_Items_Path(), con.Get_Config_file()));
+
+            Regex rx = new Regex(@"Vendor.*");
+            string vend = "NA";
+            for (int i = 0; i < fd.Count(); i++)
+            {
+                Match match = rx.Match(fd[i]);
+                if (match.Value.Contains("Vendor"))
+                {
+                    vend = match.Value.Split('=')[1].Trim();
+                    break;   
+                }
+            }
+
+            Utilities.Vendor = vend;
+
+            Utilities.Progress = 100;
+            Thread.Sleep(1000);
+            Utilities.Progress = 0;
+        
         }
 
         

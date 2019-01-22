@@ -26,10 +26,14 @@ namespace Installer
 
             CalibrationFiles = new List<string>();
             ConfigFiles = new List<string>();
+
+            
             
         }
 
-       
+        public static string WarningReboot { get; set; }
+        public static Brush LogTextColor { get; set; }
+        public static string Vendor { get; set; }
         public static bool Connect { get; set; }
         public static string  Hexagon { get; set; }
         public static bool EnableDebug { get; set; }
