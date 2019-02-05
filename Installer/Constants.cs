@@ -21,6 +21,7 @@ namespace Installer
         public static string BackgroungUnkown { get; set; }
         public static string White { get; set; }
         public static string Orange { get; set; }
+        public static string HeadersProperties { get; set; }
        
         public Constants()
         {
@@ -33,6 +34,9 @@ namespace Installer
             BackgroungUnkown = "#ffe6e6";
             White = "#ffffff";
             Orange = "#ff471a";
+            HeadersProperties = "#FFE69A6E";
+
+
 
             
         }

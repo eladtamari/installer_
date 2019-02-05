@@ -63,7 +63,7 @@ namespace Installer
             
             //set the infinity icon
             string iconsPath;
-            iconsPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "INFINITY_logo.jpg");
+            iconsPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "INFINITY_logo.png");
             if (File.Exists(iconsPath))
                 logo.Source = new BitmapImage(new Uri(iconsPath, UriKind.RelativeOrAbsolute));
           
@@ -560,6 +560,8 @@ namespace Installer
                         b_reboot.IsEnabled = true;
                         b_refresh.IsEnabled = true;
                         cb_enable_debug.IsEnabled = true;
+                        b_Tests.IsEnabled = true;
+                       
                     }
                     else if (Utilities.ConnectionVal == "Fastboot")
                     {
@@ -573,6 +575,8 @@ namespace Installer
                         b_reboot.IsEnabled = false;
                         b_refresh.IsEnabled = false;
                         cb_enable_debug.IsEnabled = false;
+                        b_Tests.IsEnabled = false;
+                      
                         Utilities.BatteryLevel = 0;
                         
                     }
@@ -588,6 +592,7 @@ namespace Installer
                         b_reboot.IsEnabled = false;
                         b_refresh.IsEnabled = false;
                         cb_enable_debug.IsEnabled = false;
+                        b_Tests.IsEnabled = false;
                         Utilities.BatteryLevel = 0;
                         
                     
@@ -812,15 +817,15 @@ namespace Installer
             if (string.IsNullOrEmpty(Utilities.Hexagon))
                 l_hexagon.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
             else
-                l_hexagon.Foreground = (Brush)bc.ConvertFromString(Constants.BlackForeground);
+                l_hexagon.Foreground = (Brush)bc.ConvertFromString(Constants.HeadersProperties);
             if (Utilities.CalibrationFiles.Count < 1)
                 l_calib_file.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
             else
-                l_calib_file.Foreground = (Brush)bc.ConvertFromString(Constants.BlackForeground);
+                l_calib_file.Foreground = (Brush)bc.ConvertFromString(Constants.HeadersProperties);
             if (Utilities.ConfigFiles.Count < 1)
                 l_config_files.Foreground = (Brush)bc.ConvertFromString(Constants.FileMissing);
             else
-                l_config_files.Foreground = (Brush)bc.ConvertFromString(Constants.BlackForeground);
+                l_config_files.Foreground = (Brush)bc.ConvertFromString(Constants.HeadersProperties);
         } 
         #endregion
 
